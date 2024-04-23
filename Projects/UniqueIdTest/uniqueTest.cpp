@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdint>
 
+#include "uniqueTestVer.h"
+
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
 
@@ -91,14 +93,6 @@ protected:
 	Identifiable(const std::string& name)
         : m_id(Identifiable<T>::sm_idm.GetNewId()) { sm_typename.assign(name); }
 
-//    Identifiable(const Identifiable& orig) = default;
-//    Identifiable& operator=(const Identifiable& rhs) = default;
-
-//    Identifiable(Identifiable&& other) = delete;
-//    Identifiable& operator=(Identifiable&& other) = delete;
-
-//    virtual ~Identifiable() = default;
-
 public:
 	[[nodiscard]] inline const TypeID GetID() const { return m_id; }
 	[[nodiscard]] inline const TypeID GetTypeID() const { return sm_typeId; }
@@ -172,8 +166,30 @@ const char* TrueOrFalse(const bool& value)
     return value ? "true" : "false";
 }
 
+std::string LastToken(const std::string& in, const std::string seps = "\\/:")
+{
+    std::size_t lastpos(in.find_last_of(seps));
+    if (in.empty())
+    {
+        return std::string{""};
+    }
+    else if (lastpos == std::string::npos)
+    {
+        return in;
+    }
+    else
+    {
+        std::string outString(in.substr(lastpos+1));
+        return outString;
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_Version_Major << "."
+        << UniqueIdTest_Version_Minor << "." << UniqueIdTest_Version_Patch
+        << std::endl << std::endl;
+
     {
         bool test1SameTypeId{ false };
         bool test1DiifInternalId{ false };
