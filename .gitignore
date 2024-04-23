@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+*.bak
+tmp/**
+**/build/**
+*.dummy
+*.tmp
+
