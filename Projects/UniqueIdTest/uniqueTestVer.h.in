@@ -1,0 +1,6 @@
+#pragma once
+
+#define UniqueIdTest_Version_Major @UniqueIdTest_VERSION_MAJOR@
+#define UniqueIdTest_Version_Minor @UniqueIdTest_VERSION_MINOR@
+#define UniqueIdTest_Version_Patch @UniqueIdTest_VERSION_PATCH@
+
