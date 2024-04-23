@@ -143,6 +143,89 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+class StatBase
+{
+    typedef std::int16_t StatVal;
+private:
+    StatVal m_strength;
+    StatVal m_dexterity;
+    StatVal m_constitution;
+
+public:
+    StatBase() : m_strength(0), m_dexterity(0), m_constitution(0) {}
+    StatBase(const StatVal& strength, const StatVal& dexterity, const StatVal& constitution)
+        : m_strength(strength), m_dexterity(dexterity), m_constitution(constitution) {}
+    StatBase(const StatBase& orig)
+        : m_strength(orig.Strength()), m_dexterity(orig.Dexterity()), m_constitution(orig.Constitution()) {}
+    virtual ~StatBase() {}
+
+    [[nodiscard]] inline const StatVal& Strength() const { return m_strength; }
+    [[nodiscard]] inline StatVal& Strength() { return m_strength; }
+    inline StatBase& Strength(const StatVal& strength) { m_strength = strength; return *this; }
+
+    [[nodiscard]] inline const StatVal& Dexterity() const { return m_dexterity; }
+    [[nodiscard]] inline StatVal& Dexterity() { return m_dexterity; }
+    inline StatBase& Dexterity(const StatVal& dexterity) { m_dexterity = dexterity; return *this; }
+
+    [[nodiscard]] inline const StatVal& Constitution() const { return m_constitution; }
+    [[nodiscard]] inline StatVal& Constitution() { return m_constitution; }
+    inline StatBase& Constitution(const StatVal& constitution) { m_constitution = constitution; return *this; }
+
+    [[nodiscard]] const std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "    Strength: " << Strength() << std::endl
+            << "   Dexterity: " << Dexterity() << std::endl
+            << "Constitution: " << Constitution() << std::endl;
+        return ss.str();
+    }
+};
+
+class Test4 : public Identifiable<Test4>, public StatBase
+{
+private:
+
+protected:
+
+public:
+    Test4() : Identifiable<Test4>("Test4"), StatBase(1, 2, 3) {}
+    virtual ~Test4() {}
+
+    [[nodiscard]] const std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << "[" << GetTypeName() << ":" << GetTypeID() << "]" << std::endl
+           << "\tID: " << GetID() << std::endl
+           << "\tStats: [" << StatBase::ToString() << "]" << std::endl;
+        return ss.str();
+    }
+
+    [[nodiscard]] const std::string ToJSoNString(bool formatted = true) const
+    {
+        constexpr char dqu{'\"'};
+        const std::string space{formatted ? " " : ""};
+        const std::string lineEnd{formatted ? "\n" : ""};
+        const std::string indent{formatted ? "\t" : ""};
+
+        std::stringstream ss;
+        ss << "{" << lineEnd
+           << indent << dqu << "Type" << dqu << ":" << space << "{" << lineEnd
+           << indent << indent << dqu << "Name" << dqu << ":" << space << dqu << GetTypeName() << dqu << "," << lineEnd
+           << indent << indent << dqu << "Id" << dqu << ":" << space << GetTypeID() << lineEnd
+           << indent << "}," << lineEnd
+           << indent << dqu << "Id" << dqu << ":" << space << GetID() << "," << lineEnd
+           << indent << dqu << "Stats" << dqu << ":" << space << "[" << lineEnd
+           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << Strength() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << Dexterity() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << Constitution() << space << "}" << lineEnd
+           << indent << "]" << lineEnd
+           << "}";
+        return ss.str();
+    }
+};
+
+//-----------------------------------------------------------------------------
 // Provide some dummy output stream operators
 std::ostream& operator<<(std::ostream& oss, const Test1& test) {
     oss << "Type Id:" << test.GetTypeID() << ", Id: " << test.Id()
@@ -159,6 +242,11 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
     oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
         << test.GetID() << ", Our value: " << test.Value();
+    return oss;
+}
+
+std::ostream& operator<<(std::ostream& oss, const Test4& test) {
+    oss << test.ToString();
     return oss;
 }
 
@@ -213,7 +301,7 @@ int main(int argc, char *argv[])
 
         std::set<TypeID> Test1IdSet;
         bool test1SameTypeId{ false };
-        bool test1DiifInternalId{ false };
+        bool test1DiffInternalId{ false };
 
         // Each Test1 object should have the same type Id, but a unique internal Id
         Test1 test1_1("test1_1"), test1_2("test1_2"), test1_3("test1_3"), test1_4("test1_4");
@@ -228,20 +316,21 @@ int main(int argc, char *argv[])
             (test1_1.GetTypeID() == test1_3.GetTypeID()));
         std::cout << "\tAll Test1 objects have the same type Id? "
             << TrueOrFalse(test1SameTypeId) << std::endl;
-        test1DiifInternalId = true;
-        test1DiifInternalId &= AddToSet(test1_1.Id(), Test1IdSet);
-        test1DiifInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
-        test1DiifInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
-        test1DiifInternalId &= AddToSet(test1_4.Id(), Test1IdSet);
-        std::cout << "\tAll Test1 objects have the different internal Ids? "
-            << TrueOrFalse(test1DiifInternalId) << std::endl;
-        std::cout << std::endl << std::endl;
+        test1DiffInternalId = true;
+        test1DiffInternalId &= AddToSet(test1_1.Id(), Test1IdSet);
+        test1DiffInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
+        test1DiffInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
+        test1DiffInternalId &= AddToSet(test1_4.Id(), Test1IdSet);
 
+        std::cout << "\tAll Test1 objects have the different internal Ids? "
+            << TrueOrFalse(test1DiffInternalId) << std::endl;
+
+        std::cout << std::endl << std::endl;
         std::cout << dashes << std::endl << "class Test2:" << std::endl;
 
         std::set<TypeID> Test2IdSet;
         bool test2SameTypeId{ false };
-        bool test2DiifInternalId{ false };
+        bool test2DiffInternalId{ false };
 
         // Each Test1 object should have the same type Id, but a unique internal Id
         // The type Id must be different to Test 1, but the internal Ids are allowed
@@ -253,18 +342,22 @@ int main(int argc, char *argv[])
             << "\t" << test2_3 << std::endl
             << "\t" << test2_4 << std::endl
             << std::endl;
+
         test2SameTypeId = ((test2_1.GetTypeID() == test2_2.GetTypeID()) &&
             (test2_3.GetTypeID() == test2_4.GetTypeID()) &&
             (test2_1.GetTypeID() == test2_3.GetTypeID()));
+
         std::cout << "\tAll Test2 objects have the same type Id? "
             << TrueOrFalse(test2SameTypeId) << std::endl;
-        test2DiifInternalId = true;
-        test2DiifInternalId &= AddToSet(test2_1.Id(), Test2IdSet);
-        test2DiifInternalId &= AddToSet(test2_2.Id(), Test2IdSet);
-        test2DiifInternalId &= AddToSet(test2_3.Id(), Test2IdSet);
-        test2DiifInternalId &= AddToSet(test2_4.Id(), Test2IdSet);
+
+        test2DiffInternalId = true;
+        test2DiffInternalId &= AddToSet(test2_1.Id(), Test2IdSet);
+        test2DiffInternalId &= AddToSet(test2_2.Id(), Test2IdSet);
+        test2DiffInternalId &= AddToSet(test2_3.Id(), Test2IdSet);
+        test2DiffInternalId &= AddToSet(test2_4.Id(), Test2IdSet);
+
         std::cout << "\tAll Test2 objects have the different internal Ids? "
-            << TrueOrFalse(test2DiifInternalId) << std::endl;
+            << TrueOrFalse(test2DiffInternalId) << std::endl;
         std::cout << std::endl << std::endl;
     }
 
@@ -278,28 +371,77 @@ int main(int argc, char *argv[])
         // Each Test1 object should have the same type Id, but a unique internal Id
         Test3 test3_1(1000, "test3_1"), test3_2(2000, "test3_2"),
               test3_3(3000, "test3_3"), test3_4(4000, "test3_4");
-            std::cout
-                << "\t" << test3_1 << std::endl
-                << "\t" << test3_2 << std::endl
-                << "\t" << test3_3 << std::endl
-                << "\t" << test3_4 << std::endl
+        std::cout
+            << "\t" << test3_1 << std::endl
+            << "\t" << test3_2 << std::endl
+            << "\t" << test3_3 << std::endl
+            << "\t" << test3_4 << std::endl
+            << std::endl;
+
+        test3SameTypeId = ((test3_1.GetTypeID() == test3_2.GetTypeID()) &&
+            (test3_3.GetTypeID() == test3_4.GetTypeID()) &&
+            (test3_1.GetTypeID() == test3_3.GetTypeID()));
+        std::cout << "\tAll Test3 objects have the same type Id? "
+            << TrueOrFalse(test3SameTypeId) << std::endl;
+
+        test3DiffInternalId = true;
+        test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_2.GetID(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_3.GetID(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
+
+        std::cout << "\tAll Test3 objects have the different internal Ids? "
+            << TrueOrFalse(test3DiffInternalId) << std::endl;
+
+        std::cout << std::endl << std::endl;
+        std::cout << dashes << std::endl << "class Test3:" << std::endl;
+
+        std::set<TypeID> Test4IdSet;
+        bool test4SameTypeId{ false };
+        bool test4DiffInternalId{ false };
+
+        // Each Test4 object should have the same type Id, but a unique internal Id
+        // The type Id must be different to Test 3, but the internal Ids are allowed
+        // to overlap.  The combination of TypeId AND Id is required to be unique
+        Test4 test4_1, test4_2, test4_3, test4_4;
+
+        std::cout
+            << test4_1 << std::endl
+            << test4_2 << std::endl
+            << test4_3 << std::endl
+            << test4_4 << std::endl
+            << std::endl;
+
+        test4SameTypeId = ((test4_1.GetTypeID() == test4_2.GetTypeID()) &&
+            (test4_3.GetTypeID() == test4_4.GetTypeID()) &&
+            (test4_1.GetTypeID() == test4_3.GetTypeID()));
+
+        std::cout << "\tAll Test2 objects have the same type Id? "
+            << TrueOrFalse(test4SameTypeId) << std::endl;
+
+        test4DiffInternalId = true;
+        test4DiffInternalId &= AddToSet(test4_1.GetID(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_2.GetID(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_3.GetID(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_4.GetID(), Test4IdSet);
+
+        std::cout << "\tAll Test4 objects have the different internal Ids? "
+            << TrueOrFalse(test4DiffInternalId) << std::endl;
+        std::cout << std::endl << std::endl;
+
+        {
+            std::cout << test4_1.ToJSoNString(true) << std::endl;
+
+            std::cout << "{\"TestVals\":["
+                << test4_1.ToJSoNString(false) << ","
+                << test4_2.ToJSoNString(false) << ","
+                << test4_3.ToJSoNString(false) << ","
+                << test4_4.ToJSoNString(false)
+                << "]}"
                 << std::endl;
-
-            test3SameTypeId = ((test3_1.GetTypeID() == test3_2.GetTypeID()) &&
-                (test3_3.GetTypeID() == test3_4.GetTypeID()) &&
-                (test3_1.GetTypeID() == test3_3.GetTypeID()));
-            std::cout << "\tAll Test3 objects have the same type Id? "
-                << TrueOrFalse(test3SameTypeId) << std::endl;
-
-            test3DiffInternalId = true;
-            test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
-            test3DiffInternalId &= AddToSet(test3_2.GetID(), Test3IdSet);
-            test3DiffInternalId &= AddToSet(test3_3.GetID(), Test3IdSet);
-            test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
-            std::cout << "\tAll Test3 objects have the different internal Ids? "
-                << TrueOrFalse(test3DiffInternalId) << std::endl;
-            std::cout << std::endl << std::endl;
+        }
     }
+
 
     std::cout << dashes << std::endl;
 
