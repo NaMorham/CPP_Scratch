@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdint>
+#include <sstream>
+#include <set>
 
 #include "uniqueTestVer.h"
 
@@ -84,18 +86,18 @@ template<typename T>
 class Identifiable
 {
 private:
-	static IdManager sm_idm;
-	static const TypeID sm_typeId;
-	static std::string sm_typename;
-	TypeID m_id;
+    static IdManager sm_idm;
+    static const TypeID sm_typeId;
+    static std::string sm_typename;
+    TypeID m_id;
 
 protected:
-	Identifiable(const std::string& name)
+    Identifiable(const std::string& name)
         : m_id(Identifiable<T>::sm_idm.GetNewId()) { sm_typename.assign(name); }
 
 public:
-	[[nodiscard]] inline const TypeID GetID() const { return m_id; }
-	[[nodiscard]] inline const TypeID GetTypeID() const { return sm_typeId; }
+    [[nodiscard]] inline const TypeID GetID() const { return m_id; }
+    [[nodiscard]] inline const TypeID GetTypeID() const { return sm_typeId; }
     [[nodiscard]] inline const std::string& GetTypeName() const { return sm_typename; }
 };
 
@@ -108,6 +110,7 @@ const TypeID Identifiable<T>::sm_typeId = GetId<T>();
 template<typename T>
 std::string Identifiable<T>::sm_typename{""};
 
+//-----------------------------------------------------------------------------
 class Test3 : public Identifiable<Test3>
 {
 private:
@@ -117,7 +120,7 @@ private:
 protected:
 
 public:
-	Test3(const std::uint32_t value = 0, const std::string& dummy = "")
+    Test3(const std::uint32_t value = 0, const std::string& dummy = "")
         : Identifiable<Test3>("Test3"), m_value(value), m_dummy(dummy) {}
 
     Test3(const Test3& orig) = delete;  // no copying
@@ -156,7 +159,7 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
     oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
         << test.GetID() << ", Our value: " << test.Value();
-	return oss;
+    return oss;
 }
 
 //-----------------------------------------------------------------------------
@@ -184,36 +187,59 @@ std::string LastToken(const std::string& in, const std::string seps = "\\/:")
     }
 }
 
+bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
+{
+    if (theSet.contains(id))
+    {
+        return false;
+    }
+    else
+    {
+        theSet.insert(id);
+        return true;
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    const std::string dashes(70, '-');
+
     std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_Version_Major << "."
         << UniqueIdTest_Version_Minor << "." << UniqueIdTest_Version_Patch
         << std::endl << std::endl;
 
     {
+        std::cout << dashes << std::endl << "class Test1:" << std::endl;
+
+        std::set<TypeID> Test1IdSet;
         bool test1SameTypeId{ false };
         bool test1DiifInternalId{ false };
 
         // Each Test1 object should have the same type Id, but a unique internal Id
         Test1 test1_1("test1_1"), test1_2("test1_2"), test1_3("test1_3"), test1_4("test1_4");
         std::cout
-            << test1_1 << std::endl
-            << test1_2 << std::endl
-            << test1_3 << std::endl
-            << test1_4 << std::endl
+            << "\t" << test1_1 << std::endl
+            << "\t" << test1_2 << std::endl
+            << "\t" << test1_3 << std::endl
+            << "\t" << test1_4 << std::endl
             << std::endl;
         test1SameTypeId = ((test1_1.GetTypeID() == test1_2.GetTypeID()) &&
             (test1_3.GetTypeID() == test1_4.GetTypeID()) &&
             (test1_1.GetTypeID() == test1_3.GetTypeID()));
-        std::cout << "All Test1 objects have the same type Id? "
+        std::cout << "\tAll Test1 objects have the same type Id? "
             << TrueOrFalse(test1SameTypeId) << std::endl;
-        test1DiifInternalId = (test1_1.Id() != test1_2.Id() != test1_2.Id() != test1_4.Id());
-        std::cout << "All Test1 objects have the different internal Ids? "
+        test1DiifInternalId = true;
+        test1DiifInternalId &= AddToSet(test1_1.Id(), Test1IdSet);
+        test1DiifInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
+        test1DiifInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
+        test1DiifInternalId &= AddToSet(test1_4.Id(), Test1IdSet);
+        std::cout << "\tAll Test1 objects have the different internal Ids? "
             << TrueOrFalse(test1DiifInternalId) << std::endl;
         std::cout << std::endl << std::endl;
-    }
 
-    {
+        std::cout << dashes << std::endl << "class Test2:" << std::endl;
+
+        std::set<TypeID> Test2IdSet;
         bool test2SameTypeId{ false };
         bool test2DiifInternalId{ false };
 
@@ -222,21 +248,60 @@ int main(int argc, char *argv[])
         // to overlap.  The combination of TypeId AND Id is required to be unique
         Test2 test2_1("test2_1"), test2_2("test2_2"), test2_3("test2_3"), test2_4("test2_4");
         std::cout
-            << test2_1 << std::endl
-            << test2_2 << std::endl
-            << test2_3 << std::endl
-            << test2_4 << std::endl
+            << "\t" << test2_1 << std::endl
+            << "\t" << test2_2 << std::endl
+            << "\t" << test2_3 << std::endl
+            << "\t" << test2_4 << std::endl
             << std::endl;
         test2SameTypeId = ((test2_1.GetTypeID() == test2_2.GetTypeID()) &&
             (test2_3.GetTypeID() == test2_4.GetTypeID()) &&
             (test2_1.GetTypeID() == test2_3.GetTypeID()));
-        std::cout << "All Test1 objects have the same type Id? "
+        std::cout << "\tAll Test2 objects have the same type Id? "
             << TrueOrFalse(test2SameTypeId) << std::endl;
-        test2DiifInternalId = (test2_1.Id() != test2_2.Id() != test2_2.Id() != test2_4.Id());
-        std::cout << "All Test1 objects have the different internal Ids? "
+        test2DiifInternalId = true;
+        test2DiifInternalId &= AddToSet(test2_1.Id(), Test2IdSet);
+        test2DiifInternalId &= AddToSet(test2_2.Id(), Test2IdSet);
+        test2DiifInternalId &= AddToSet(test2_3.Id(), Test2IdSet);
+        test2DiifInternalId &= AddToSet(test2_4.Id(), Test2IdSet);
+        std::cout << "\tAll Test2 objects have the different internal Ids? "
             << TrueOrFalse(test2DiifInternalId) << std::endl;
         std::cout << std::endl << std::endl;
     }
+
+    {
+        std::cout << dashes << std::endl << "class Test3:" << std::endl;
+
+        std::set<TypeID> Test3IdSet;
+        bool test3SameTypeId{ false };
+        bool test3DiffInternalId{ false };
+
+        // Each Test1 object should have the same type Id, but a unique internal Id
+        Test3 test3_1(1000, "test3_1"), test3_2(2000, "test3_2"),
+              test3_3(3000, "test3_3"), test3_4(4000, "test3_4");
+            std::cout
+                << "\t" << test3_1 << std::endl
+                << "\t" << test3_2 << std::endl
+                << "\t" << test3_3 << std::endl
+                << "\t" << test3_4 << std::endl
+                << std::endl;
+
+            test3SameTypeId = ((test3_1.GetTypeID() == test3_2.GetTypeID()) &&
+                (test3_3.GetTypeID() == test3_4.GetTypeID()) &&
+                (test3_1.GetTypeID() == test3_3.GetTypeID()));
+            std::cout << "\tAll Test3 objects have the same type Id? "
+                << TrueOrFalse(test3SameTypeId) << std::endl;
+
+            test3DiffInternalId = true;
+            test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
+            test3DiffInternalId &= AddToSet(test3_2.GetID(), Test3IdSet);
+            test3DiffInternalId &= AddToSet(test3_3.GetID(), Test3IdSet);
+            test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
+            std::cout << "\tAll Test3 objects have the different internal Ids? "
+                << TrueOrFalse(test3DiffInternalId) << std::endl;
+            std::cout << std::endl << std::endl;
+    }
+
+    std::cout << dashes << std::endl;
 
     return 0;
 }
