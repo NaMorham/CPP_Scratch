@@ -1,0 +1,11 @@
+#pragma once
+
+#define CustomLinkedList_Version_Major @CustomLinkedList_VERSION_MAJOR@
+#define CustomLinkedList_Version_Minor @CustomLinkedList_VERSION_MINOR@
+#define CustomLinkedList_Version_Patch @CustomLinkedList_VERSION_PATCH@
+#define CustomLinkedList_Version_Tweak @CustomLinkedList_VERSION_TWEAK@
+
+#define CustomLinkedList_VersionShort "@CustomLinkedList_VERSION_MAJOR@.@CustomLinkedList_VERSION_MINOR@"
+#define CustomLinkedList_VersionLong CustomLinkedList_VersionShort".@CustomLinkedList_VERSION_PATCH@"
+#define CustomLinkedList_VersionFull CustomLinkedList_VersionLong".@CustomLinkedList_VERSION_TWEAK@"
+
