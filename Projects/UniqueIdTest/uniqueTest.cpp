@@ -1,63 +1,6 @@
 #include <iostream>
 #include <cstdint>
 
-#include <algorithm>
-
-//-----------------------------------------------------------------------------
-template<std::size_t N>
-struct CompTimeStr {
-    char data[N] {};
-
-    consteval CompTimeStr(const char (&str)[N]) {
-        std::copy_n(str, N, data);
-    }
-
-    consteval bool operator==(const CompTimeStr<N> str) const {
-        return std::equal(str.data, str.data+N, data);
-    }
-
-    template<std::size_t N2>
-    consteval bool operator==(const CompTimeStr<N2> s) const {
-        return false;
-    }
-
-    template<std::size_t N2>
-    consteval CompTimeStr<N+N2-1> operator+(const CompTimeStr<N2> str) const {
-        char newchar[N+N2-1] {};
-        std::copy_n(data, N-1, newchar);
-        std::copy_n(str.data, N2, newchar+N-1);
-        return newchar;
-    }
-
-    consteval char operator[](std::size_t n) const {
-        return data[n];
-    }
-
-    consteval std::size_t size() const {
-        return N-1;
-    }
-};
-
-template<std::size_t s1, std::size_t s2>
-consteval auto operator+(CompTimeStr<s1> fs, const char (&str) [s2]) {
-    return fs + CompTimeStr<s2>(str);
-}
-
-template<std::size_t s1, std::size_t s2>
-consteval auto operator+(const char (&str) [s2], CompTimeStr<s1> fs) {
-    return CompTimeStr<s2>(str) + fs;
-}
-
-template<std::size_t s1, std::size_t s2>
-consteval auto operator==(CompTimeStr<s1> fs, const char (&str) [s2]) {
-    return fs == CompTimeStr<s2>(str);
-}
-
-template<std::size_t s1, std::size_t s2>
-consteval auto operator==(const char (&str) [s2], CompTimeStr<s1> fs) {
-    return CompTimeStr<s2>(str) == fs;
-}
-
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
 
@@ -135,7 +78,7 @@ IdManager Test2::sm_idm = IdManager();
 const TypeID Test2::sm_typeId = GetId<Test2>();
 
 //-----------------------------------------------------------------------------
-template<typename T, CompTimeStr name>
+template<typename T>
 class Identifiable
 {
 private:
@@ -145,8 +88,16 @@ private:
 	TypeID m_id;
 
 protected:
-	Identifiable() : m_id(Identifiable<T, name>::sm_idm.GetNewId()) {}
-	virtual ~Identifiable() {}
+	Identifiable(const std::string& name)
+        : m_id(Identifiable<T>::sm_idm.GetNewId()) { sm_typename.assign(name); }
+
+//    Identifiable(const Identifiable& orig) = default;
+//    Identifiable& operator=(const Identifiable& rhs) = default;
+
+//    Identifiable(Identifiable&& other) = delete;
+//    Identifiable& operator=(Identifiable&& other) = delete;
+
+//    virtual ~Identifiable() = default;
 
 public:
 	[[nodiscard]] inline const TypeID GetID() const { return m_id; }
@@ -154,16 +105,16 @@ public:
     [[nodiscard]] inline const std::string& GetTypeName() const { return sm_typename; }
 };
 
-template<typename T, CompTimeStr name>
-IdManager Identifiable<T,name>::sm_idm = IdManager();
+template<typename T>
+IdManager Identifiable<T>::sm_idm = IdManager();
 
-template<typename T, CompTimeStr name>
-const TypeID Identifiable<T,name>::sm_typeId = GetId<T>();
+template<typename T>
+const TypeID Identifiable<T>::sm_typeId = GetId<T>();
 
-template<typename T, CompTimeStr name>
-std::string Identifiable<T,name>::sm_typename(name);
+template<typename T>
+std::string Identifiable<T>::sm_typename{""};
 
-class Test3 : public Identifiable<Test3,"Test3">
+class Test3 : public Identifiable<Test3>
 {
 private:
     std::uint32_t m_value;
@@ -173,7 +124,7 @@ protected:
 
 public:
 	Test3(const std::uint32_t value = 0, const std::string& dummy = "")
-        : Identifiable<Test3, "Test3">(), m_value(value), m_dummy(dummy) {}
+        : Identifiable<Test3>("Test3"), m_value(value), m_dummy(dummy) {}
 
     Test3(const Test3& orig) = delete;  // no copying
     Test3& operator=(const Test3& rhs) = delete;
