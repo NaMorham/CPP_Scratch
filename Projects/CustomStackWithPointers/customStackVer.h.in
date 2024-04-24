@@ -1,0 +1,11 @@
+#pragma once
+
+#define CustomStackWithPointers_Version_Major @CustomStackWithPointers_VERSION_MAJOR@
+#define CustomStackWithPointers_Version_Minor @CustomStackWithPointers_VERSION_MINOR@
+#define CustomStackWithPointers_Version_Patch @CustomStackWithPointers_VERSION_PATCH@
+#define CustomStackWithPointers_Version_Tweak @CustomStackWithPointers_VERSION_TWEAK@
+
+#define CustomStackWithPointers_VersionShort "@CustomStackWithPointers_VERSION_MAJOR@.@CustomStackWithPointers_VERSION_MINOR@"
+#define CustomStackWithPointers_VersionLong CustomStackWithPointers_VersionShort".@CustomStackWithPointers_VERSION_PATCH@"
+#define CustomStackWithPointers_VersionFull CustomStackWithPointers_VersionLong".@CustomStackWithPointers_VERSION_TWEAK@"
+
