@@ -156,10 +156,11 @@ namespace NaM
 struct Point2D
 {
     std::int32_t x{0}, y{ 0 };
-    [[nodiscard]] inline const std::string& ToString() const
+    [[nodiscard]] inline const std::string ToString() const
     {
         std::stringstream ss;
         ss << "*pNode (" << this << ") = *this";
+        return ss.str();
     }
 };
 
