@@ -34,6 +34,9 @@
 *.bak
 tmp/**
 **/build/**
+**/build_*/**
 *.dummy
 *.tmp
+*_bak
+/out/**
 
