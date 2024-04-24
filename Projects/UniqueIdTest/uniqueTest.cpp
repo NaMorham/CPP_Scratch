@@ -292,8 +292,7 @@ int main(int argc, char *argv[])
 {
     const std::string dashes(70, '-');
 
-    std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_Version_Major << "."
-        << UniqueIdTest_Version_Minor << "." << UniqueIdTest_Version_Patch
+    std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
         << std::endl << std::endl;
 
     {
