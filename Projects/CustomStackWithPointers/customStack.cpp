@@ -200,7 +200,7 @@ namespace NaM
         {
             while (m_pHead)
             {
-                //std::cerr << g_counter << "delete head node: " 
+                //std::cerr << g_counter << "delete head node: "
                 //    << std::setw(3) << std::setfill(' ') << m_pHead->Id()
                 //    << " " << m_pHead << ", Size: " << m_size
                 //    << std::endl;
@@ -525,7 +525,7 @@ void StackWPTests()
                 << std::endl;
         }
     }
- 
+
     {
         TestRunCerr run("Peek top of stack");
         DummyStackWP stk;
