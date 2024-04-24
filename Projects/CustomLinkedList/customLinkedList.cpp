@@ -126,8 +126,22 @@ namespace NaM
             [[nodiscard]] inline const SingleLinkedListNode_p<T> Tail() const { return m_pTail; }
             [[nodiscard]] inline SingleLinkedListNode_p<T> Tail() { return m_pTail; }
 
+            // add data at the tail
             SingleLinkedList& Append(const T& newData);
+            inline SingleLinkedList& Push(const T& newData) { return Append(newData); }
             inline SingleLinkedList& operator+=(const T& newData) { return Append(newData); }
+            // insert data at the front
+            SingleLinkedList& Prepend(const T& newData);
+            inline SingleLinkedList& PushFront(const T& newData) { return Prepend(newData); }
+            // pop the last node off the tail
+            T Pop();
+            // pop the first node off the head
+            T PopFront();
+
+            // empty the List
+            SingleLinkedList& Clear();
+
+            [[nodiscard]] inline const bool IsEmpty() const { return (!m_pHead); }
 
             const std::string ToString() const;
         };
@@ -142,6 +156,11 @@ namespace NaM
 struct Point2D
 {
     std::int32_t x{0}, y{ 0 };
+    [[nodiscard]] inline const std::string& ToString() const
+    {
+        std::stringstream ss;
+        ss << "*pNode (" << this << ") = *this";
+    }
 };
 
 std::ostream& operator<<(std::ostream& oss, const Point2D& pt)
@@ -159,24 +178,23 @@ using P2D_List = NaM::CppScratch::SingleLinkedList<Point2D>;
 using P2D_List_p = NaM::CppScratch::SingleLinkedList_p<Point2D>;
 
 const std::string DASHES(std::string(70, '-'));
+const std::string nullvalstr(std::string("0x").append(std::string(sizeof(P2D_Node_p), '0')));
 
 std::ostream& operator<<(std::ostream& oss, const P2D_Node_p pNode)
 {
-    static const std::string nullval = std::string(sizeof(P2D_Node_p), '0');
     if (pNode)
         oss << std::hex << std::setfill('0') << std::setw(sizeof(pNode)) << (void*)pNode << std::dec;
     else
-        oss << "0x" << nullval;
+        oss << "0x" << nullvalstr;
     return oss;
 }
 
 std::ostream& operator<<(std::ostream& oss, const P2D_List_p pList)
 {
-    static const std::string nullval = std::string(sizeof(P2D_List_p), '0');
     if (pList)
         oss << std::hex << std::setfill('0') << std::setw(sizeof(pList)) << (void*)pList << std::dec;
     else
-        oss << "0x" << nullval;
+        oss << "0x" << nullvalstr;
     return oss;
 }
 
@@ -191,18 +209,20 @@ std::ostream& operator<<(std::ostream& oss, const P2D_Node& node)
 
 void ErrPrintP2DNode(const P2D_Node_p pNode)
 {
-    static const std::string nullval = std::string(sizeof(P2D_Node_p), '0');
-    std::cerr << "*pNode (" << pNode << ") = ";
     if (pNode)
-        std::cerr << (*pNode);
+    {
+        std::cerr << "*pNode (" << pNode << ") = ";
+        std::cerr << pNode->ToString();
+    }
     else
-        std::cerr << "0x" << nullval;
+    {
+        std::cerr << "*pNode (" << nullvalstr << ")";
+    }
     std::cerr << std::endl;
 }
 
 void ErrPrintP2DNode(const P2D_Node_p* ppNode, const size_t num)
 {
-    static const std::string nullval = std::string(sizeof(P2D_Node_p), '0');
     if (ppNode)
     {
         for (size_t i = 0; i < num; ++i)
@@ -212,7 +232,7 @@ void ErrPrintP2DNode(const P2D_Node_p* ppNode, const size_t num)
     }
     else
     {
-        std::cerr << "0x" << nullval;
+        std::cerr << "0x" << nullvalstr;
     }
     std::cerr << std::endl;
 }
@@ -221,6 +241,13 @@ std::ostream& operator<<(std::ostream& oss, const P2D_List& theList)
 {
     oss << theList.ToString();
     return oss;
+}
+
+const std::string& BoolStr(const bool& bVal)
+{
+    static std::string trueString{"true"};
+    static std::string falseString{"false"};
+    return (bVal ? trueString : falseString);
 }
 
 //------------------------------------------------------------------------
@@ -240,6 +267,22 @@ int main(int argc, char* argv[])
 }
 
 //------------------------------------------------------------------------
+class _CounterVal
+{
+private:
+    static std::uint64_t ms_count;
+public:
+    [[nodiscard]] inline const std::uint64_t GetCount() const { return ms_count; }
+    [[nodiscard]] inline const std::uint64_t Count() const { return ++ms_count; }
+};
+std::uint64_t _CounterVal::ms_count = 0;
+std::ostream& operator<<(std::ostream& oss, const _CounterVal& counter)
+{
+    oss << std::dec << std::setw(2) << counter.Count(); return oss;
+}
+_CounterVal g_counter;
+
+//------------------------------------------------------------------------
 namespace NaM
 {
     namespace CppScratch
@@ -247,7 +290,7 @@ namespace NaM
         template<typename T>
         SingleLinkedListNode<T>::~SingleLinkedListNode()
         {
-            std::cerr << "Delete Node: " << Id() << std::endl;
+            std::cerr << g_counter << ") Delete Node: " << Id() << std::endl;
         }
 
         template<typename T>
@@ -266,10 +309,11 @@ namespace NaM
             return ss.str();
         }
 
+        //----------------------------------------------------------------
         template<typename T>
         SingleLinkedList<T>::~SingleLinkedList()
         {
-            std::cerr << "Delete List: " << std::setw(2) << Id() << std::endl;
+            std::cerr << g_counter << ") Delete List: " << std::setw(2) << std::setfill('\0') << Id() << std::endl;
             SingleLinkedListNode_p<T> pNode{Head()};
             while (pNode)
             {
@@ -280,7 +324,6 @@ namespace NaM
                 m_pHead = pNext;
                 pNode = pNext;
                 --m_length;
-                std::cerr << *this << std::endl;
             }
         }
 
@@ -306,6 +349,88 @@ namespace NaM
             {
                 std::cerr << "COULD NOT ALLOCATE NEW NODE" << std::endl;
             }
+            return *this;
+        }
+
+        template<typename T>
+        SingleLinkedList<T>& SingleLinkedList<T>::Prepend(const T& newData)
+        {
+            SingleLinkedListNode_p<T> pNewNode{ new SingleLinkedListNode<T>{ newData } };
+            if (pNewNode)
+            {
+                pNewNode->m_pNext = m_pHead;
+                m_pHead = pNewNode;
+                ++m_length;
+                if (!m_pTail)
+                    m_pTail = m_pHead;
+            }
+            else
+            {
+                std::cerr << "COULD NOT ALLOCATE NEW NODE" << std::endl;
+            }
+            return *this;
+        }
+
+        template<typename T>
+        T SingleLinkedList<T>::Pop()
+        {
+            if (m_pTail)
+            {
+                SingleLinkedListNode_p<T> pPrev{m_pHead};
+                T tailData(m_pTail->Data());
+                // to find the previous, we have to loop
+                while (pPrev && pPrev->Next() != m_pTail)
+                    pPrev = pPrev->Next();
+                if (pPrev)
+                {
+                    pPrev->m_pNext = nullptr;
+                    delete m_pTail;
+                    m_pTail = pPrev;
+                    --m_length;
+                }
+                else
+                {
+                    m_pHead = m_pTail = nullptr;
+                }
+
+                return tailData;
+            }
+            else
+            {
+                return T{}; // return a new T? - should probably throw an exception
+            }
+        }
+
+        template<typename T>
+        T SingleLinkedList<T>::PopFront()
+        {
+            if (m_pHead)
+            {
+                T headData(m_pHead->Data());
+                m_pHead = m_pHead->Next();
+                --m_length;
+                if (!m_pHead)
+                    m_pTail = nullptr;
+                return headData;
+            }
+            else
+            {
+                return T{}; // return a new T?
+            }
+        }
+
+        template<typename T>
+        SingleLinkedList<T>& SingleLinkedList<T>::Clear()
+        {
+            while (m_pHead)
+            {
+                SingleLinkedListNode_p<T> pNext{m_pHead->Next()};
+                delete m_pHead;
+                m_pHead = pNext;
+            }
+            m_length = 0;
+            m_pTail = nullptr;
+
             return *this;
         }
 
@@ -363,19 +488,6 @@ public:
 };
 std::uint64_t TestRunCerr::ms_runId = 0;
 
-class _CounterVal
-{
-private:
-    static std::uint64_t ms_count;
-public:
-    [[nodiscard]] inline const std::uint64_t GetCount() const { return ms_count; }
-    [[nodiscard]] inline const std::uint64_t Count() const { return ++ms_count; }
-};
-std::uint64_t _CounterVal::ms_count = 0;
-std::ostream& operator<<(std::ostream& oss, const _CounterVal& counter)
-{ oss << std::dec << counter.Count(); return oss; }
-_CounterVal g_counter;
-
 void TestSLLNodes()
 {
     TestRunCerr nodesRun("NODES");
@@ -385,7 +497,7 @@ void TestSLLNodes()
         P2D_Node_p pNode = TEST_P2D_Node::NewNode(Point2D{ 0,0 });
         ErrPrintP2DNode(pNode);
 
-        std::cerr << "ToString() = \"" << pNode->ToString() << std::endl;
+        std::cerr << g_counter << ") ToString() = \"" << pNode->ToString() << std::endl;
 
         TEST_P2D_Node::DeleteNode(pNode);
         ErrPrintP2DNode(pNode);
@@ -394,7 +506,7 @@ void TestSLLNodes()
         P2D_Node_p pNode2{ TEST_P2D_Node::NewNode(Point2D{3,4}) };
         ErrPrintP2DNode(pNode2);
 
-        std::cerr << "ToString() = \"" << pNode2->ToString() << std::endl;
+        std::cerr << g_counter << ") ToString() = \"" << pNode2->ToString() << std::endl;
 
         TEST_P2D_Node::DeleteNode(pNode2);
         ErrPrintP2DNode(pNode2);
@@ -442,35 +554,137 @@ void TestSLLLists()
         TestRunCerr listRun("Empty list");
 
         P2D_List list1;
-        std::cerr << "list1: " << list1 << std::endl;
+        std::cerr << g_counter << ") list1: " << list1 << std::endl;
     }
 
     {
         TestRunCerr listRun("List append 1");
 
         P2D_List list2;
-        size_t step{ 0 };
-        std::cerr << std::setw(2) << ++step << ") list2: " << list2 << std::endl;
+        std::cerr << g_counter << ") list2: " << list2 << std::endl;
         list2.Append(Point2D{ -1, 1 });
-        std::cerr << std::setw(2) << ++step << ") list2: " << list2 << std::endl;
+        std::cerr << g_counter << ") list2: " << list2 << std::endl;
     }
 
     {
-        TestRunCerr listRun("List append N");
+        TestRunCerr listRun("List Append N");
 
         P2D_List list3;
-        size_t step2{ 0 };
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
         list3.Append(Point2D{ 0, 3 });
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
         list3.Append(Point2D{ 3, 3 });
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
         list3.Append(Point2D{ 0, 6 });
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
         list3.Append(Point2D{ 3, 9 });
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
         list3.Append(Point2D{ 0, 3 });
-        std::cerr << std::setw(2) << ++step2 << ") list3: " << list3 << std::endl;
+        std::cerr << g_counter << ") list3: " << list3 << std::endl;
     }
 
+    {
+        TestRunCerr listRun("List Pop");
+
+        P2D_List list4;
+        size_t numPoints{ 3 };
+        std::cerr << g_counter << ") list4: " << list4 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list4.Append(Point2D{ idx, idx });
+        std::cerr << g_counter << ") after " << numPoints << "appends, list4: "
+            << list4 << std::endl;
+        std::cerr << g_counter << ") begin " << numPoints << " Pop calls" << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+        {
+            Point2D data{ list4.Pop() };
+            std::cerr << g_counter << ") list4 pop# " << (idx + 1) << ": " << list4
+                << "," << std::endl << "\tpopped point: " << data << std::endl;
+        }
+    }
+
+    {
+        TestRunCerr listRun("List PopFront");
+
+        P2D_List list5;
+        size_t numPoints{ 3 };
+        std::cerr << g_counter << ") list5: " << list5 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list5.Append(Point2D{ idx, idx });
+        std::cerr << g_counter << ") after " << numPoints << " appends, list5: "
+            << list5 << std::endl;
+        std::cerr << g_counter << ") begin " << numPoints << " PopFront calls" << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+        {
+            Point2D data{ list5.PopFront() };
+            std::cerr << g_counter << ") list5 pop# " << (idx + 1) << ": " << list5
+                << "," << std::endl << "\tpopped point : " << data << std::endl;
+        }
+    }
+
+    {
+        TestRunCerr listRun("List Prepend");
+
+        P2D_List list6;
+        size_t numPoints{ 6 };
+        std::cerr << g_counter << ") list6: " << list6 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list6.Prepend(Point2D{ idx + 10, idx + 100 });
+        std::cerr << g_counter << ") after " << numPoints << " prepends, list6: "
+            << list6 << std::endl;
+    }
+
+    {
+        TestRunCerr listRun("List Push");
+
+        P2D_List list7;
+        size_t numPoints{ 4 };
+        std::cerr << g_counter << ") list7: " << list7 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list7.Push(Point2D{ idx + 10, idx + 100 });
+        std::cerr << g_counter << ") after " << numPoints << " pushes, list7: "
+            << list7 << std::endl;
+    }
+
+    {
+        TestRunCerr listRun("List +=");
+
+        P2D_List list8;
+        size_t numPoints{ 4 };
+        std::cerr << g_counter << ") list7: " << list8 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list8 += Point2D{ 100 - idx, 10 - idx };
+        std::cerr << g_counter << ") after " << numPoints << " += calls, list8: "
+            << list8 << std::endl;
+    }
+
+    {
+        TestRunCerr listRun("List PushFront");
+
+        P2D_List list7;
+        size_t numPoints{ 4 };
+        std::cerr << g_counter << ") list7: " << list7 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list7.Push(Point2D{ idx + 10, idx + 100 });
+        std::cerr << g_counter << ") after " << numPoints << " pushes, list7: "
+            << list7 << std::endl;
+    }
+
+    {
+        TestRunCerr listRun("List IsEmpty");
+
+        P2D_List list9;
+        std::cerr << g_counter << ") list9: is empty? " << BoolStr(list9.IsEmpty())
+            << ", " << list9 << std::endl;
+        list9 += Point2D{-3, -4};
+        std::cerr << g_counter << ") list9: after append is empty? " << BoolStr(list9.IsEmpty())
+            << ", " << list9 << std::endl;
+    }
+
+    {
+        TestRunCerr listRun("List Clear");
+
+        P2D_List list10;
+        size_t numPoints{ 4 };
+        std::cerr << g_counter << ") list10: " << list10 << std::endl;
+        for (auto idx = 0; idx < numPoints; ++idx)
+            list10.Append(Point2D{ idx - 10, idx + 10 });
+        std::cerr << g_counter << ") after " << numPoints << " appends, list10: " << list10 << std::endl;
+        list10.Clear();
+        std::cerr << g_counter << ") after Clear list10: " << list10 << std::endl;
+    }
 }
