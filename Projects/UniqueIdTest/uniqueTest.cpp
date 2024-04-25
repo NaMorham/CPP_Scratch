@@ -5,10 +5,14 @@
 
 #include "uniqueTestVer.h"
 
+#include "NaM/identifiable.h"
+#include "NaM/testUtils.h"
+
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
 
 //-----------------------------------------------------------------------------
+#if 0
 inline const TypeID _GetId()
 {
     static TypeID lastId = 0;
@@ -21,6 +25,7 @@ inline const TypeID GetId() noexcept
     static TypeID typeId = _GetId();
     return typeId;
 }
+#endif
 
 //-----------------------------------------------------------------------------
 // Another test class using the same IdManager but differnt Ids
@@ -55,7 +60,7 @@ public:
 };
 
 IdManager Test1::sm_idm = IdManager();
-const TypeID Test1::sm_typeId = GetId<Test1>();
+const TypeID Test1::sm_typeId = NaM::CppScratch::GetId<Test1>();
 
 //-----------------------------------------------------------------------------
 // Another test class using the same IdManager but differnt Ids
@@ -79,9 +84,10 @@ public:
 };
 
 IdManager Test2::sm_idm = IdManager();
-const TypeID Test2::sm_typeId = GetId<Test2>();
+const TypeID Test2::sm_typeId = NaM::CppScratch::GetId<Test2>();
 
 //-----------------------------------------------------------------------------
+#if 0
 template<typename T>
 class Identifiable
 {
@@ -109,9 +115,10 @@ const TypeID Identifiable<T>::sm_typeId = GetId<T>();
 
 template<typename T>
 std::string Identifiable<T>::sm_typename{""};
+#endif
 
 //-----------------------------------------------------------------------------
-class Test3 : public Identifiable<Test3>
+class Test3 : public NaM::CppScratch::Identifiable<Test3>
 {
 private:
     std::uint32_t m_value;
@@ -142,7 +149,6 @@ public:
     Test3& Dummy(const std::uint32_t& newValue) { m_value = newValue; return *this; }
 };
 
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 class StatBase
 {
@@ -182,7 +188,7 @@ public:
     }
 };
 
-class Test4 : public Identifiable<Test4>, public StatBase
+class Test4 : public NaM::CppScratch::Identifiable<Test4>, public StatBase
 {
 private:
 
@@ -241,7 +247,8 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
     oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
-        << test.GetID() << ", Our value: " << test.Value();
+        << test.GetID() << ", Count: " << test.GetTypeCount()
+        << ", Our value: " << test.Value();
     return oss;
 }
 
@@ -251,6 +258,7 @@ std::ostream& operator<<(std::ostream& oss, const Test4& test) {
 }
 
 //-----------------------------------------------------------------------------
+#if 0
 // Simple main test calls
 const char* TrueOrFalse(const bool& value)
 {
@@ -274,6 +282,7 @@ std::string LastToken(const std::string& in, const std::string seps = "\\/:")
         return outString;
     }
 }
+#endif
 
 bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
 {
@@ -292,7 +301,7 @@ int main(int argc, char *argv[])
 {
     const std::string dashes(70, '-');
 
-    std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
+    std::cout << NaM::CppScratch::LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
         << std::endl << std::endl;
 
     {
@@ -314,7 +323,7 @@ int main(int argc, char *argv[])
             (test1_3.GetTypeID() == test1_4.GetTypeID()) &&
             (test1_1.GetTypeID() == test1_3.GetTypeID()));
         std::cout << "\tAll Test1 objects have the same type Id? "
-            << TrueOrFalse(test1SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test1SameTypeId) << std::endl;
         test1DiffInternalId = true;
         test1DiffInternalId &= AddToSet(test1_1.Id(), Test1IdSet);
         test1DiffInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
@@ -322,7 +331,7 @@ int main(int argc, char *argv[])
         test1DiffInternalId &= AddToSet(test1_4.Id(), Test1IdSet);
 
         std::cout << "\tAll Test1 objects have the different internal Ids? "
-            << TrueOrFalse(test1DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test1DiffInternalId) << std::endl;
 
         std::cout << std::endl << std::endl;
         std::cout << dashes << std::endl << "class Test2:" << std::endl;
@@ -347,7 +356,7 @@ int main(int argc, char *argv[])
             (test2_1.GetTypeID() == test2_3.GetTypeID()));
 
         std::cout << "\tAll Test2 objects have the same type Id? "
-            << TrueOrFalse(test2SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test2SameTypeId) << std::endl;
 
         test2DiffInternalId = true;
         test2DiffInternalId &= AddToSet(test2_1.Id(), Test2IdSet);
@@ -356,7 +365,7 @@ int main(int argc, char *argv[])
         test2DiffInternalId &= AddToSet(test2_4.Id(), Test2IdSet);
 
         std::cout << "\tAll Test2 objects have the different internal Ids? "
-            << TrueOrFalse(test2DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test2DiffInternalId) << std::endl;
         std::cout << std::endl << std::endl;
     }
 
@@ -381,7 +390,7 @@ int main(int argc, char *argv[])
             (test3_3.GetTypeID() == test3_4.GetTypeID()) &&
             (test3_1.GetTypeID() == test3_3.GetTypeID()));
         std::cout << "\tAll Test3 objects have the same type Id? "
-            << TrueOrFalse(test3SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test3SameTypeId) << std::endl;
 
         test3DiffInternalId = true;
         test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
@@ -390,7 +399,7 @@ int main(int argc, char *argv[])
         test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
 
         std::cout << "\tAll Test3 objects have the different internal Ids? "
-            << TrueOrFalse(test3DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test3DiffInternalId) << std::endl;
 
         std::cout << std::endl << std::endl;
         std::cout << dashes << std::endl << "class Test3:" << std::endl;
@@ -416,7 +425,7 @@ int main(int argc, char *argv[])
             (test4_1.GetTypeID() == test4_3.GetTypeID()));
 
         std::cout << "\tAll Test2 objects have the same type Id? "
-            << TrueOrFalse(test4SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test4SameTypeId) << std::endl;
 
         test4DiffInternalId = true;
         test4DiffInternalId &= AddToSet(test4_1.GetID(), Test4IdSet);
@@ -425,7 +434,7 @@ int main(int argc, char *argv[])
         test4DiffInternalId &= AddToSet(test4_4.GetID(), Test4IdSet);
 
         std::cout << "\tAll Test4 objects have the different internal Ids? "
-            << TrueOrFalse(test4DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test4DiffInternalId) << std::endl;
         std::cout << std::endl << std::endl;
 
         {
