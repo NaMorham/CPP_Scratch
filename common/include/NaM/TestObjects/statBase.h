@@ -154,13 +154,13 @@ namespace NaM
                 [[nodiscard]] const StatBase operator+(const StatBase& rhs) const
                 {
                     return StatBase{
-                        Strength() + rhs.Strength(),
-                        Dexterity() + rhs.Dexterity(),
-                        Constitution() + rhs.Constitution(),
-                        Intelligence() + rhs.Intelligence(),
-                        Wisdom() + rhs.Wisdom(),
-                        Charisma() + rhs.Charisma(),
-                        StrengthAdd() + rhs.StrengthAdd()
+                        StatVal(Strength() + rhs.Strength()),
+                        StatVal(Dexterity() + rhs.Dexterity()),
+                        StatVal(Constitution() + rhs.Constitution()),
+                        StatVal(Intelligence() + rhs.Intelligence()),
+                        StatVal(Wisdom() + rhs.Wisdom()),
+                        StatVal(Charisma() + rhs.Charisma()),
+                        StatVal(StrengthAdd() + rhs.StrengthAdd())
                     };
                 }
 
@@ -179,26 +179,26 @@ namespace NaM
                 [[nodiscard]] const StatBase operator-(const StatBase& rhs) const
                 {
                     return StatBase{
-                        Strength() - rhs.Strength(),
-                        Dexterity() - rhs.Dexterity(),
-                        Constitution() - rhs.Constitution(),
-                        Intelligence() - rhs.Intelligence(),
-                        Wisdom() - rhs.Wisdom(),
-                        Charisma() - rhs.Charisma(),
-                        StrengthAdd() - rhs.StrengthAdd()
+                        StatVal(Strength() - rhs.Strength()),
+                        StatVal(Dexterity() - rhs.Dexterity()),
+                        StatVal(Constitution() - rhs.Constitution()),
+                        StatVal(Intelligence() - rhs.Intelligence()),
+                        StatVal(Wisdom() - rhs.Wisdom()),
+                        StatVal(Charisma() - rhs.Charisma()),
+                        StatVal(StrengthAdd() - rhs.StrengthAdd())
                     };
                 }
 
                 [[nodiscard]] const StatBase operator-() const
                 {
                     return StatBase{
-                        -Strength(),
-                        -Dexterity(),
-                        -Constitution(),
-                        -Intelligence(),
-                        -Wisdom(),
-                        -Charisma(),
-                        -StrengthAdd()
+                        StatVal(-Strength()),
+                        StatVal(-Dexterity()),
+                        StatVal(-Constitution()),
+                        StatVal(-Intelligence()),
+                        StatVal(-Wisdom()),
+                        StatVal(Charisma()),
+                        StatVal(-StrengthAdd())
                     };
                 }
 
