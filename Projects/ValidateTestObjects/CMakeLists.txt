@@ -18,12 +18,19 @@ set (CMN_HDRS
     ${Common_HEADERS}NaM/TestObjects/testObjects.h
 )
 
+set (TESTOBJ_HDRS
+    ${Common_HEADERS}NaM/TestObjects/dummyData.h
+    ${Common_HEADERS}NaM/TestObjects/statBase.h
+    ${Common_HEADERS}NaM/TestObjects/testPoint2D.h
+)
+
 source_group("Headers" FILES ${HDRS})
 source_group("Common" FILES )
 source_group("Common/Headers" FILES ${CMN_HDRS})
+source_group("Common/Headers/TestObjects" FILES ${TESTOBJ_HDRS})
 source_group("Sources" FILES ${SRCS})
 
-add_executable(${PROJECT_NAME} ${SRCS} ${HDRS} ${CMN_HDRS})
+add_executable(${PROJECT_NAME} ${SRCS} ${HDRS} ${CMN_HDRS} ${TESTOBJ_HDRS})
 
 #message("${PROJECT_NAME}: \${Common_HEADERS} = ${Common_HEADERS}")
 #message("${PROJECT_NAME}: \${Common_SOURCES} = ${Common_SOURCES}")
