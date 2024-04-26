@@ -52,7 +52,7 @@ public:
     {
         std::stringstream ss;
         ss << "[ "
-            << "Id: " << GetID() << ", "
+            << "Id: " << Id() << ", "
             << "Name: " << Name() << ", "
             << "Pos (" << X() << ", " << Y() << ", " << Z() << ") "
             << "]";
