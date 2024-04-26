@@ -7,25 +7,10 @@
 
 #include "NaM/identifiable.h"
 #include "NaM/testUtils.h"
+#include "NaM/TestObjects/statBase.h"
 
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
-
-//-----------------------------------------------------------------------------
-#if 0
-inline const TypeID _GetId()
-{
-    static TypeID lastId = 0;
-    return ++lastId;
-}
-
-template <typename T>
-inline const TypeID GetId() noexcept
-{
-    static TypeID typeId = _GetId();
-    return typeId;
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Another test class using the same IdManager but differnt Ids
@@ -87,37 +72,6 @@ IdManager Test2::sm_idm = IdManager();
 const TypeID Test2::sm_typeId = NaM::CppScratch::GetId<Test2>();
 
 //-----------------------------------------------------------------------------
-#if 0
-template<typename T>
-class Identifiable
-{
-private:
-    static IdManager sm_idm;
-    static const TypeID sm_typeId;
-    static std::string sm_typename;
-    TypeID m_id;
-
-protected:
-    Identifiable(const std::string& name)
-        : m_id(Identifiable<T>::sm_idm.GetNewId()) { sm_typename.assign(name); }
-
-public:
-    [[nodiscard]] inline const TypeID GetID() const { return m_id; }
-    [[nodiscard]] inline const TypeID GetTypeID() const { return sm_typeId; }
-    [[nodiscard]] inline const std::string& GetTypeName() const { return sm_typename; }
-};
-
-template<typename T>
-IdManager Identifiable<T>::sm_idm = IdManager();
-
-template<typename T>
-const TypeID Identifiable<T>::sm_typeId = GetId<T>();
-
-template<typename T>
-std::string Identifiable<T>::sm_typename{""};
-#endif
-
-//-----------------------------------------------------------------------------
 class Test3 : public NaM::CppScratch::Identifiable<Test3>
 {
 private:
@@ -150,6 +104,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+#if 0
 class StatBase
 {
     typedef std::int16_t StatVal;
@@ -187,6 +142,8 @@ public:
         return ss.str();
     }
 };
+#endif
+using NaM::CppScratch::TestObjects::StatBase;
 
 class Test4 : public NaM::CppScratch::Identifiable<Test4>, public StatBase
 {

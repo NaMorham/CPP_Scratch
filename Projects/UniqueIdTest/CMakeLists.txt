@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.1)
 
-project(UniqueIdTest VERSION 1.1.0.0)
+project(UniqueIdTest VERSION 1.1.1.0)
 
 configure_file(uniqueTestVer.h.in uniqueTestVer.h)
 
@@ -15,6 +15,7 @@ set (HDRS
 set (CMN_HDRS
     ${Common_HEADERS}NaM/identifiable.h
     ${Common_HEADERS}NaM/testUtils.h
+    ${Common_HEADERS}NaM/TestObjects/statBase.h
 )
 
 source_group("Headers" FILES ${HDRS})
