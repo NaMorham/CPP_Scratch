@@ -5,3 +5,5 @@ project(Scratch_Projects)
 add_subdirectory("CustomLinkedList")
 add_subdirectory("CustomStackWithPointers")
 add_subdirectory("UniqueIdTest")
+add_subdirectory("ValidateTestObjects")
+

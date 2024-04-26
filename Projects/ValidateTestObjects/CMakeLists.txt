@@ -1,31 +1,36 @@
 cmake_minimum_required(VERSION 3.16.1)
 
-project(CustomLinkedList VERSION 1.1.0.1)
+project(ValidateTestObjects VERSION 1.0.0.0)
 
-configure_file(customLinkedListVer.h.in customLinkedListVer.h)
+configure_file(testObjectHeadersVer.h.in testObjectHeadersVer.h)
 
 set (SRCS
-    customLinkedList.cpp
+    testObjectHeaders.cpp
 )
 
 set (HDRS
-    ${PROJECT_BINARY_DIR}/customLinkedListVer.h
+    ${PROJECT_BINARY_DIR}/testObjectHeadersVer.h
 )
 
 set (CMN_HDRS
     ${Common_HEADERS}NaM/identifiable.h
     ${Common_HEADERS}NaM/testUtils.h
+    ${Common_HEADERS}NaM/TestObjects/testObjects.h
+)
+
+set (TESTOBJ_HDRS
+    ${Common_HEADERS}NaM/TestObjects/dummyData.h
+    ${Common_HEADERS}NaM/TestObjects/statBase.h
     ${Common_HEADERS}NaM/TestObjects/testPoint2D.h
 )
 
-# create the folder structure for the IDE if it is supported
 source_group("Headers" FILES ${HDRS})
 source_group("Common" FILES )
 source_group("Common/Headers" FILES ${CMN_HDRS})
+source_group("Common/Headers/TestObjects" FILES ${TESTOBJ_HDRS})
 source_group("Sources" FILES ${SRCS})
 
-# the project
-add_executable(${PROJECT_NAME} ${SRCS} ${HDRS} ${CMN_HDRS})
+add_executable(${PROJECT_NAME} ${SRCS} ${HDRS} ${CMN_HDRS} ${TESTOBJ_HDRS})
 
 #message("${PROJECT_NAME}: \${Common_HEADERS} = ${Common_HEADERS}")
 #message("${PROJECT_NAME}: \${Common_SOURCES} = ${Common_SOURCES}")
@@ -42,3 +47,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_SOURCE_DIR}/out/NaM/bin)
+

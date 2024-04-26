@@ -5,22 +5,12 @@
 
 #include "uniqueTestVer.h"
 
+#include "NaM/identifiable.h"
+#include "NaM/testUtils.h"
+#include "NaM/TestObjects/statBase.h"
+
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
-
-//-----------------------------------------------------------------------------
-inline const TypeID _GetId()
-{
-    static TypeID lastId = 0;
-    return ++lastId;
-}
-
-template <typename T>
-inline const TypeID GetId() noexcept
-{
-    static TypeID typeId = _GetId();
-    return typeId;
-}
 
 //-----------------------------------------------------------------------------
 // Another test class using the same IdManager but differnt Ids
@@ -55,7 +45,7 @@ public:
 };
 
 IdManager Test1::sm_idm = IdManager();
-const TypeID Test1::sm_typeId = GetId<Test1>();
+const TypeID Test1::sm_typeId = NaM::CppScratch::GetId<Test1>();
 
 //-----------------------------------------------------------------------------
 // Another test class using the same IdManager but differnt Ids
@@ -79,39 +69,10 @@ public:
 };
 
 IdManager Test2::sm_idm = IdManager();
-const TypeID Test2::sm_typeId = GetId<Test2>();
+const TypeID Test2::sm_typeId = NaM::CppScratch::GetId<Test2>();
 
 //-----------------------------------------------------------------------------
-template<typename T>
-class Identifiable
-{
-private:
-    static IdManager sm_idm;
-    static const TypeID sm_typeId;
-    static std::string sm_typename;
-    TypeID m_id;
-
-protected:
-    Identifiable(const std::string& name)
-        : m_id(Identifiable<T>::sm_idm.GetNewId()) { sm_typename.assign(name); }
-
-public:
-    [[nodiscard]] inline const TypeID GetID() const { return m_id; }
-    [[nodiscard]] inline const TypeID GetTypeID() const { return sm_typeId; }
-    [[nodiscard]] inline const std::string& GetTypeName() const { return sm_typename; }
-};
-
-template<typename T>
-IdManager Identifiable<T>::sm_idm = IdManager();
-
-template<typename T>
-const TypeID Identifiable<T>::sm_typeId = GetId<T>();
-
-template<typename T>
-std::string Identifiable<T>::sm_typename{""};
-
-//-----------------------------------------------------------------------------
-class Test3 : public Identifiable<Test3>
+class Test3 : public NaM::CppScratch::Identifiable<Test3>
 {
 private:
     std::uint32_t m_value;
@@ -143,61 +104,28 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-class StatBase
-{
-    typedef std::int16_t StatVal;
-private:
-    StatVal m_strength;
-    StatVal m_dexterity;
-    StatVal m_constitution;
+using NaM::CppScratch::TestObjects::StatBase;
 
-public:
-    StatBase() : m_strength(0), m_dexterity(0), m_constitution(0) {}
-    StatBase(const StatVal& strength, const StatVal& dexterity, const StatVal& constitution)
-        : m_strength(strength), m_dexterity(dexterity), m_constitution(constitution) {}
-    StatBase(const StatBase& orig)
-        : m_strength(orig.Strength()), m_dexterity(orig.Dexterity()), m_constitution(orig.Constitution()) {}
-    virtual ~StatBase() {}
-
-    [[nodiscard]] inline const StatVal& Strength() const { return m_strength; }
-    [[nodiscard]] inline StatVal& Strength() { return m_strength; }
-    inline StatBase& Strength(const StatVal& strength) { m_strength = strength; return *this; }
-
-    [[nodiscard]] inline const StatVal& Dexterity() const { return m_dexterity; }
-    [[nodiscard]] inline StatVal& Dexterity() { return m_dexterity; }
-    inline StatBase& Dexterity(const StatVal& dexterity) { m_dexterity = dexterity; return *this; }
-
-    [[nodiscard]] inline const StatVal& Constitution() const { return m_constitution; }
-    [[nodiscard]] inline StatVal& Constitution() { return m_constitution; }
-    inline StatBase& Constitution(const StatVal& constitution) { m_constitution = constitution; return *this; }
-
-    [[nodiscard]] const std::string ToString() const
-    {
-        std::stringstream ss;
-        ss << "    Strength: " << Strength() << std::endl
-            << "   Dexterity: " << Dexterity() << std::endl
-            << "Constitution: " << Constitution() << std::endl;
-        return ss.str();
-    }
-};
-
-class Test4 : public Identifiable<Test4>, public StatBase
+class Test4 : public NaM::CppScratch::Identifiable<Test4>
 {
 private:
+    StatBase m_stats;
 
 protected:
 
 public:
-    Test4() : Identifiable<Test4>("Test4"), StatBase(1, 2, 3) {}
+    Test4() : Identifiable<Test4>("Test4") {}
     virtual ~Test4() {}
+
+    [[nodiscard]] inline const StatBase& Stats() const { return m_stats; }
+    [[nodiscard]] inline StatBase& Stats() { return m_stats; }
 
     [[nodiscard]] const std::string ToString() const
     {
         std::stringstream ss;
         ss << "[" << GetTypeName() << ":" << GetTypeID() << "]" << std::endl
            << "\tID: " << GetID() << std::endl
-           << "\tStats: [" << StatBase::ToString() << "]" << std::endl;
+           << "\tStats: " << m_stats.ToString() << std::endl;
         return ss.str();
     }
 
@@ -216,9 +144,9 @@ public:
            << indent << "}," << lineEnd
            << indent << dqu << "Id" << dqu << ":" << space << GetID() << "," << lineEnd
            << indent << dqu << "Stats" << dqu << ":" << space << "[" << lineEnd
-           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << Strength() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << Dexterity() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << Constitution() << space << "}" << lineEnd
+           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << m_stats.Strength() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << m_stats.Dexterity() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << m_stats.Constitution() << space << "}" << lineEnd
            << indent << "]" << lineEnd
            << "}";
         return ss.str();
@@ -241,7 +169,8 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
     oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
-        << test.GetID() << ", Our value: " << test.Value();
+        << test.GetID() << ", Count: " << test.GetTypeCount()
+        << ", Our value: " << test.Value();
     return oss;
 }
 
@@ -251,6 +180,7 @@ std::ostream& operator<<(std::ostream& oss, const Test4& test) {
 }
 
 //-----------------------------------------------------------------------------
+#if 0
 // Simple main test calls
 const char* TrueOrFalse(const bool& value)
 {
@@ -274,6 +204,7 @@ std::string LastToken(const std::string& in, const std::string seps = "\\/:")
         return outString;
     }
 }
+#endif
 
 bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
 {
@@ -292,7 +223,7 @@ int main(int argc, char *argv[])
 {
     const std::string dashes(70, '-');
 
-    std::cout << LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
+    std::cout << NaM::CppScratch::LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
         << std::endl << std::endl;
 
     {
@@ -314,7 +245,7 @@ int main(int argc, char *argv[])
             (test1_3.GetTypeID() == test1_4.GetTypeID()) &&
             (test1_1.GetTypeID() == test1_3.GetTypeID()));
         std::cout << "\tAll Test1 objects have the same type Id? "
-            << TrueOrFalse(test1SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test1SameTypeId) << std::endl;
         test1DiffInternalId = true;
         test1DiffInternalId &= AddToSet(test1_1.Id(), Test1IdSet);
         test1DiffInternalId &= AddToSet(test1_2.Id(), Test1IdSet);
@@ -322,7 +253,7 @@ int main(int argc, char *argv[])
         test1DiffInternalId &= AddToSet(test1_4.Id(), Test1IdSet);
 
         std::cout << "\tAll Test1 objects have the different internal Ids? "
-            << TrueOrFalse(test1DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test1DiffInternalId) << std::endl;
 
         std::cout << std::endl << std::endl;
         std::cout << dashes << std::endl << "class Test2:" << std::endl;
@@ -347,7 +278,7 @@ int main(int argc, char *argv[])
             (test2_1.GetTypeID() == test2_3.GetTypeID()));
 
         std::cout << "\tAll Test2 objects have the same type Id? "
-            << TrueOrFalse(test2SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test2SameTypeId) << std::endl;
 
         test2DiffInternalId = true;
         test2DiffInternalId &= AddToSet(test2_1.Id(), Test2IdSet);
@@ -356,7 +287,7 @@ int main(int argc, char *argv[])
         test2DiffInternalId &= AddToSet(test2_4.Id(), Test2IdSet);
 
         std::cout << "\tAll Test2 objects have the different internal Ids? "
-            << TrueOrFalse(test2DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test2DiffInternalId) << std::endl;
         std::cout << std::endl << std::endl;
     }
 
@@ -381,7 +312,7 @@ int main(int argc, char *argv[])
             (test3_3.GetTypeID() == test3_4.GetTypeID()) &&
             (test3_1.GetTypeID() == test3_3.GetTypeID()));
         std::cout << "\tAll Test3 objects have the same type Id? "
-            << TrueOrFalse(test3SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test3SameTypeId) << std::endl;
 
         test3DiffInternalId = true;
         test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
@@ -390,7 +321,7 @@ int main(int argc, char *argv[])
         test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
 
         std::cout << "\tAll Test3 objects have the different internal Ids? "
-            << TrueOrFalse(test3DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test3DiffInternalId) << std::endl;
 
         std::cout << std::endl << std::endl;
         std::cout << dashes << std::endl << "class Test3:" << std::endl;
@@ -416,7 +347,7 @@ int main(int argc, char *argv[])
             (test4_1.GetTypeID() == test4_3.GetTypeID()));
 
         std::cout << "\tAll Test2 objects have the same type Id? "
-            << TrueOrFalse(test4SameTypeId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test4SameTypeId) << std::endl;
 
         test4DiffInternalId = true;
         test4DiffInternalId &= AddToSet(test4_1.GetID(), Test4IdSet);
@@ -425,7 +356,7 @@ int main(int argc, char *argv[])
         test4DiffInternalId &= AddToSet(test4_4.GetID(), Test4IdSet);
 
         std::cout << "\tAll Test4 objects have the different internal Ids? "
-            << TrueOrFalse(test4DiffInternalId) << std::endl;
+            << NaM::CppScratch::TrueOrFalse(test4DiffInternalId) << std::endl;
         std::cout << std::endl << std::endl;
 
         {

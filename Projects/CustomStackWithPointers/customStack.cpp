@@ -5,6 +5,10 @@
 
 #include "customStackVer.h"
 
+#include "NaM/identifiable.h"
+#include "NaM/testUtils.h"
+#include "NaM/TestObjects/dummyData.h"
+
 namespace NaM
 {
     namespace CppScratch
@@ -118,6 +122,7 @@ namespace NaM
 }  // end namespace NaM
 
 //------------------------------------------------------------------------
+#if 0
 std::string LastToken(const std::string& in, const std::string seps = "\\/:")
 {
     std::size_t lastpos(in.find_last_of(seps));
@@ -146,15 +151,22 @@ const std::string& BoolStr(const bool& bVal)
     static std::string falseString{"false"};
     return (bVal ? trueString : falseString);
 }
+#endif
 
 //------------------------------------------------------------------------
+using NaM::CppScratch::nullvalstr;
+using NaM::CppScratch::DASHES;
+using NaM::CppScratch::EQUALS;
+using NaM::CppScratch::TestRunCerr;
+
 void DummyDataTests();
 void StackWPNodeTests();
 void StackWPTests();
 
 int main(int argc, char* argv[])
 {
-    std::cout << LastToken(argv[0]) << " Version " << CustomStackWithPointers_VersionFull << std::endl;
+    std::cout << NaM::CppScratch::LastToken(argv[0]) << " Version " 
+        << CustomStackWithPointers_VersionFull << std::endl;
 
     DummyDataTests();
     StackWPNodeTests();
@@ -164,6 +176,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+#if 0
 //------------------------------------------------------------------------
 class _CounterVal
 {
@@ -180,6 +193,7 @@ std::ostream& operator<<(std::ostream& oss, const _CounterVal& counter)
     return oss;
 }
 _CounterVal g_counter;
+#endif
 
 //------------------------------------------------------------------------
 namespace NaM
@@ -268,6 +282,7 @@ namespace NaM
 }  // end namespace NaM
 
 //------------------------------------------------------------------------
+#if 0
 class TestRunCerr
 {
 private:
@@ -310,7 +325,11 @@ public:
 };
 std::uint64_t TestRunCerr::ms_runId = 0;
 size_t TestRunCerr::ms_depth = 0;
+#endif
 
+NaM::CppScratch::_CounterVal g_counter;
+
+#if 0
 struct DummyData
 {
     std::string name;
@@ -344,7 +363,8 @@ struct DummyData
     const std::string ToString() const
     {
         std::stringstream ss;
-        ss << "[ Name: \"" << name << "\", Value: " << val << ", Is: " << BoolStr(is) << " ]";
+        ss << "[ Name: \"" << name << "\", Value: " << val << ", Is: " 
+            << NaM::CppScratch::TrueOrFalse(is) << " ]";
         return ss.str();
     }
 };
@@ -354,8 +374,10 @@ std::ostream& operator<<(std::ostream& oss, const DummyData& dummy)
     oss << dummy.ToString();
     return oss;
 }
+#endif
 
 //------------------------------------------------------------------------
+using NaM::CppScratch::TestObjects::DummyData;
 using DummyStackWP = NaM::CppScratch::StackWP<DummyData>;
 using DummyStackWP_p = NaM::CppScratch::StackWP<DummyData>*;
 using DummyStackWPNode_p = NaM::CppScratch::StackWPNode<DummyData>*;
