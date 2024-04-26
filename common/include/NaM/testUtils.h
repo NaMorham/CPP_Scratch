@@ -9,6 +9,19 @@ namespace NaM
 {
     namespace CppScratch
     {
+        const std::string DASHES(std::string(70, '-'));
+        const std::string EQUALS(std::string(70, '='));
+        const std::string HASHES(std::string(70, '#'));
+        //const std::string nullvalstr(std::string("0x").append(std::string(sizeof(nullptr_t), '0')));
+        const std::string calcNullStr()
+        {
+            std::stringstream ss;
+            ss << "0x" << (void*)(nullptr);
+            return ss.str();
+        }
+        const std::string nullvalstr(calcNullStr());
+
+        //------------------------------------------------------------------------
         const std::string& TrueOrFalse(const bool& value)
         {
             static const std::string trueString{"true"};
@@ -52,18 +65,23 @@ namespace NaM
             }
         }
 
-        //------------------------------------------------------------------------
-        const std::string DASHES(std::string(70, '-'));
-        const std::string EQUALS(std::string(70, '='));
-        const std::string HASHES(std::string(70, '#'));
-        //const std::string nullvalstr(std::string("0x").append(std::string(sizeof(nullptr_t), '0')));
-        const std::string calcNullStr()
+        template<typename T>
+        const std::string PtrString(const T* ptr)
         {
             std::stringstream ss;
-            ss << "0x" << (void*)(nullptr);
+            if (ptr)
+            {
+                ss << "0x"
+                    << std::hex << std::setfill('0') << std::setw(sizeof(ptr))
+                    << (void*)ptr
+                    << std::dec;
+            }
+            else
+            {
+                ss << NaM::CppScratch::nullvalstr;
+            }
             return ss.str();
         }
-        const std::string nullvalstr(calcNullStr());
 
         //------------------------------------------------------------------------
         class _CounterVal
