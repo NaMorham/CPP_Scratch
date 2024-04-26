@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.1)
 
-project(CustomStackWithPointers VERSION 1.1.0.0)
+project(CustomStackWithPointers VERSION 1.1.0.1)
 
 configure_file(customStackVer.h.in customStackVer.h)
 
@@ -15,6 +15,7 @@ set (HDRS
 set (CMN_HDRS
     ${Common_HEADERS}NaM/identifiable.h
     ${Common_HEADERS}NaM/testUtils.h
+    ${Common_HEADERS}NaM/TestObjects/testObjects.h
 )
 
 source_group("Headers" FILES ${HDRS})

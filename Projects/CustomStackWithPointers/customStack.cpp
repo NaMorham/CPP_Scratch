@@ -7,6 +7,7 @@
 
 #include "NaM/identifiable.h"
 #include "NaM/testUtils.h"
+#include "NaM/TestObjects/testObjects.h"
 
 namespace NaM
 {
@@ -328,6 +329,7 @@ size_t TestRunCerr::ms_depth = 0;
 
 NaM::CppScratch::_CounterVal g_counter;
 
+#if 0
 struct DummyData
 {
     std::string name;
@@ -372,8 +374,10 @@ std::ostream& operator<<(std::ostream& oss, const DummyData& dummy)
     oss << dummy.ToString();
     return oss;
 }
+#endif
 
 //------------------------------------------------------------------------
+using NaM::CppScratch::TestObjects::DummyData;
 using DummyStackWP = NaM::CppScratch::StackWP<DummyData>;
 using DummyStackWP_p = NaM::CppScratch::StackWP<DummyData>*;
 using DummyStackWPNode_p = NaM::CppScratch::StackWPNode<DummyData>*;
