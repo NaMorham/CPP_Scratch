@@ -124,17 +124,17 @@ public:
     {
         std::stringstream ss;
         ss << "[" << GetTypeName() << ":" << GetTypeID() << "]" << std::endl
-           << "\tID: " << GetID() << std::endl
+           << "\tId: " << Id() << std::endl
            << "\tStats: " << m_stats.ToString() << std::endl;
         return ss.str();
     }
 
-    [[nodiscard]] const std::string ToJSoNString(bool formatted = true) const
+    [[nodiscard]] const std::string ToJSoNString(bool formatted = true, const size_t depth = 1) const
     {
         constexpr char dqu{'\"'};
         const std::string space{formatted ? " " : ""};
         const std::string lineEnd{formatted ? "\n" : ""};
-        const std::string indent{formatted ? "\t" : ""};
+        const std::string indent{formatted ? std::string(depth, '\t') : ""};
 
         std::stringstream ss;
         ss << "{" << lineEnd
@@ -142,13 +142,9 @@ public:
            << indent << indent << dqu << "Name" << dqu << ":" << space << dqu << GetTypeName() << dqu << "," << lineEnd
            << indent << indent << dqu << "Id" << dqu << ":" << space << GetTypeID() << lineEnd
            << indent << "}," << lineEnd
-           << indent << dqu << "Id" << dqu << ":" << space << GetID() << "," << lineEnd
-           << indent << dqu << "Stats" << dqu << ":" << space << "[" << lineEnd
-           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << m_stats.Strength() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << m_stats.Dexterity() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << m_stats.Constitution() << space << "}" << lineEnd
-           << indent << "]" << lineEnd
-           << "}";
+           << indent << dqu << "Id" << dqu << ":" << space << Id() << "," << lineEnd
+           << indent << dqu << "Stats" << dqu << ":" << space << Stats().ToJSoNString(formatted, 2) << lineEnd
+           << (depth > 1 ? std::string(depth-1,'\t') : "") << "}";
         return ss.str();
     }
 };
@@ -168,8 +164,8 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 }
 
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
-    oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
-        << test.GetID() << ", Count: " << test.GetTypeCount()
+    oss << "Type (" << test.TypeName() << ":" << test.TypeID() << "), Id: "
+        << test.Id() << ", Count: " << test.TypeCount()
         << ", Our value: " << test.Value();
     return oss;
 }
@@ -180,32 +176,6 @@ std::ostream& operator<<(std::ostream& oss, const Test4& test) {
 }
 
 //-----------------------------------------------------------------------------
-#if 0
-// Simple main test calls
-const char* TrueOrFalse(const bool& value)
-{
-    return value ? "true" : "false";
-}
-
-std::string LastToken(const std::string& in, const std::string seps = "\\/:")
-{
-    std::size_t lastpos(in.find_last_of(seps));
-    if (in.empty())
-    {
-        return std::string{""};
-    }
-    else if (lastpos == std::string::npos)
-    {
-        return in;
-    }
-    else
-    {
-        std::string outString(in.substr(lastpos+1));
-        return outString;
-    }
-}
-#endif
-
 bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
 {
     if (theSet.contains(id))
@@ -219,6 +189,7 @@ bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
     }
 }
 
+//-----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
     const std::string dashes(70, '-');
@@ -315,10 +286,10 @@ int main(int argc, char *argv[])
             << NaM::CppScratch::TrueOrFalse(test3SameTypeId) << std::endl;
 
         test3DiffInternalId = true;
-        test3DiffInternalId &= AddToSet(test3_1.GetID(), Test3IdSet);
-        test3DiffInternalId &= AddToSet(test3_2.GetID(), Test3IdSet);
-        test3DiffInternalId &= AddToSet(test3_3.GetID(), Test3IdSet);
-        test3DiffInternalId &= AddToSet(test3_4.GetID(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_1.Id(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_2.Id(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_3.Id(), Test3IdSet);
+        test3DiffInternalId &= AddToSet(test3_4.Id(), Test3IdSet);
 
         std::cout << "\tAll Test3 objects have the different internal Ids? "
             << NaM::CppScratch::TrueOrFalse(test3DiffInternalId) << std::endl;
@@ -350,10 +321,10 @@ int main(int argc, char *argv[])
             << NaM::CppScratch::TrueOrFalse(test4SameTypeId) << std::endl;
 
         test4DiffInternalId = true;
-        test4DiffInternalId &= AddToSet(test4_1.GetID(), Test4IdSet);
-        test4DiffInternalId &= AddToSet(test4_2.GetID(), Test4IdSet);
-        test4DiffInternalId &= AddToSet(test4_3.GetID(), Test4IdSet);
-        test4DiffInternalId &= AddToSet(test4_4.GetID(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_1.Id(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_2.Id(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_3.Id(), Test4IdSet);
+        test4DiffInternalId &= AddToSet(test4_4.Id(), Test4IdSet);
 
         std::cout << "\tAll Test4 objects have the different internal Ids? "
             << NaM::CppScratch::TrueOrFalse(test4DiffInternalId) << std::endl;

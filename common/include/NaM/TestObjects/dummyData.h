@@ -56,7 +56,7 @@ namespace NaM
                 const std::string ToString() const
                 {
                     std::stringstream ss;
-                    ss << "[ Id: " << GetID() << ", Name: \"" << name << "\", Value: " << val << ", Is: "
+                    ss << "[ Id: " << Id() << ", Name: \"" << name << "\", Value: " << val << ", Is: "
                         << NaM::CppScratch::TrueOrFalse(is) << " ]";
                     return ss.str();
                 }
@@ -64,7 +64,7 @@ namespace NaM
                 const std::string ToJSoNString() const
                 {
                     std::stringstream ss;
-                    ss << "{\"Id\":" << GetID() << ","
+                    ss << "{\"Id\":" << Id() << ","
                         <<"\"Name\":\"" << name << "\","
                         << "\"Value\":" << val << ","
                         << "\"Is\":"
@@ -79,8 +79,11 @@ namespace NaM
                 oss << dummy.ToString();
                 return oss;
             }
+
         }  // end namespace TestObjects
+
     }  // end namespace CppScratch
+
 }  // end namespace NaM
 
 //------------------------------------------------------------------------

@@ -9,19 +9,19 @@ namespace NaM
 {
     namespace CppScratch
     {
-        typedef std::uint64_t TypeID; // TODO: uuids?
+        typedef std::uint64_t TypeID_t; // TODO: uuids?
 
         //-----------------------------------------------------------------------------
-        [[nodiscard]] inline const TypeID _GetId()
+        [[nodiscard]] inline const TypeID_t _GetId()
         {
-            static TypeID lastId = 0;
+            static TypeID_t lastId = 0;
             return ++lastId;
         }
 
         template <typename T>
-        [[nodiscard]] inline const TypeID GetId() noexcept
+        [[nodiscard]] inline const TypeID_t GetId() noexcept
         {
-            static TypeID typeId = _GetId();
+            static TypeID_t typeId = _GetId();
             return typeId;
         }
 
@@ -30,12 +30,12 @@ namespace NaM
         class Identifiable
         {
         private:
-            static const TypeID ms_typeId;
-            static TypeID ms_objId;
+            static const TypeID_t ms_typeId;
+            static TypeID_t ms_objId;
             static size_t ms_objCount;
             static std::string ms_typename;
 
-            TypeID m_id;
+            TypeID_t m_id;
 
         protected:
             Identifiable() = delete;
@@ -57,20 +57,25 @@ namespace NaM
             }
 
         public:
-            [[nodiscard]] inline const TypeID GetID() const { return m_id; }
-            [[nodiscard]] inline const TypeID GetTypeID() const { return ms_typeId; }
-            [[nodiscard]] inline const TypeID GetTypeCount() const { return ms_objCount; }
-            [[nodiscard]] inline const std::string& GetTypeName() const { return ms_typename; }
+            [[nodiscard]] inline const TypeID_t Id() const { return m_id; }
+
+            [[nodiscard]] inline const TypeID_t TypeID() const { return ms_typeId; }
+            [[nodiscard]] inline const TypeID_t TypeCount() const { return ms_objCount; }
+            [[nodiscard]] inline const std::string& TypeName() const { return ms_typename; }
+
+            [[nodiscard]] inline static const TypeID_t GetTypeID() { return ms_typeId; }
+            [[nodiscard]] inline static const TypeID_t GetTypeCount() { return ms_objCount; }
+            [[nodiscard]] inline static const std::string& GetTypeName() { return ms_typename; }
         };
 
         template<typename T>
-        const TypeID Identifiable<T>::ms_typeId{GetId<T>()};
+        const TypeID_t Identifiable<T>::ms_typeId{GetId<T>()};
 
         template<typename T>
-        TypeID Identifiable<T>::ms_objId{0};
+        TypeID_t Identifiable<T>::ms_objId{0};
 
         template<typename T>
-        TypeID Identifiable<T>::ms_objCount{0};
+        TypeID_t Identifiable<T>::ms_objCount{0};
 
         template<typename T>
         std::string Identifiable<T>::ms_typename{""};
