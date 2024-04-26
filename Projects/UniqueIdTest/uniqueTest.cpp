@@ -104,63 +104,28 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-#if 0
-class StatBase
-{
-    typedef std::int16_t StatVal;
-private:
-    StatVal m_strength;
-    StatVal m_dexterity;
-    StatVal m_constitution;
-
-public:
-    StatBase() : m_strength(0), m_dexterity(0), m_constitution(0) {}
-    StatBase(const StatVal& strength, const StatVal& dexterity, const StatVal& constitution)
-        : m_strength(strength), m_dexterity(dexterity), m_constitution(constitution) {}
-    StatBase(const StatBase& orig)
-        : m_strength(orig.Strength()), m_dexterity(orig.Dexterity()), m_constitution(orig.Constitution()) {}
-    virtual ~StatBase() {}
-
-    [[nodiscard]] inline const StatVal& Strength() const { return m_strength; }
-    [[nodiscard]] inline StatVal& Strength() { return m_strength; }
-    inline StatBase& Strength(const StatVal& strength) { m_strength = strength; return *this; }
-
-    [[nodiscard]] inline const StatVal& Dexterity() const { return m_dexterity; }
-    [[nodiscard]] inline StatVal& Dexterity() { return m_dexterity; }
-    inline StatBase& Dexterity(const StatVal& dexterity) { m_dexterity = dexterity; return *this; }
-
-    [[nodiscard]] inline const StatVal& Constitution() const { return m_constitution; }
-    [[nodiscard]] inline StatVal& Constitution() { return m_constitution; }
-    inline StatBase& Constitution(const StatVal& constitution) { m_constitution = constitution; return *this; }
-
-    [[nodiscard]] const std::string ToString() const
-    {
-        std::stringstream ss;
-        ss << "    Strength: " << Strength() << std::endl
-            << "   Dexterity: " << Dexterity() << std::endl
-            << "Constitution: " << Constitution() << std::endl;
-        return ss.str();
-    }
-};
-#endif
 using NaM::CppScratch::TestObjects::StatBase;
 
-class Test4 : public NaM::CppScratch::Identifiable<Test4>, public StatBase
+class Test4 : public NaM::CppScratch::Identifiable<Test4>
 {
 private:
+    StatBase m_stats;
 
 protected:
 
 public:
-    Test4() : Identifiable<Test4>("Test4"), StatBase(1, 2, 3) {}
+    Test4() : Identifiable<Test4>("Test4") {}
     virtual ~Test4() {}
+
+    [[nodiscard]] inline const StatBase& Stats() const { return m_stats; }
+    [[nodiscard]] inline StatBase& Stats() { return m_stats; }
 
     [[nodiscard]] const std::string ToString() const
     {
         std::stringstream ss;
         ss << "[" << GetTypeName() << ":" << GetTypeID() << "]" << std::endl
            << "\tID: " << GetID() << std::endl
-           << "\tStats: [" << StatBase::ToString() << "]" << std::endl;
+           << "\tStats: " << m_stats.ToString() << std::endl;
         return ss.str();
     }
 
@@ -179,9 +144,9 @@ public:
            << indent << "}," << lineEnd
            << indent << dqu << "Id" << dqu << ":" << space << GetID() << "," << lineEnd
            << indent << dqu << "Stats" << dqu << ":" << space << "[" << lineEnd
-           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << Strength() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << Dexterity() << space << "}," << lineEnd
-           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << Constitution() << space << "}" << lineEnd
+           << indent << indent << "{" << space << dqu << "Strength" << dqu << ":" << space << m_stats.Strength() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Dexterity" << dqu << ":" << space << m_stats.Dexterity() << space << "}," << lineEnd
+           << indent << indent << "{" << space << dqu << "Constitution" << dqu << ":" << space << m_stats.Constitution() << space << "}" << lineEnd
            << indent << "]" << lineEnd
            << "}";
         return ss.str();

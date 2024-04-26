@@ -12,7 +12,7 @@ namespace NaM
     {
         namespace TestObjects
         {
-            class StatBase
+            class StatBase : public Identifiable<StatBase>
             {
                 typedef std::int16_t StatVal;
             private:
@@ -21,12 +21,29 @@ namespace NaM
                 StatVal m_constitution;
 
             public:
-                StatBase() : m_strength(0), m_dexterity(0), m_constitution(0) {}
+                StatBase()
+                    : Identifiable("StatBase"),
+                      m_strength(0), m_dexterity(0), m_constitution(0) {}
                 StatBase(const StatVal& strength, const StatVal& dexterity, const StatVal& constitution)
-                    : m_strength(strength), m_dexterity(dexterity), m_constitution(constitution) {}
+                    : Identifiable("StatBase"),
+                      m_strength(strength), m_dexterity(dexterity), m_constitution(constitution) {}
                 StatBase(const StatBase& orig)
-                    : m_strength(orig.Strength()), m_dexterity(orig.Dexterity()), m_constitution(orig.Constitution()) {}
+                    : Identifiable("StatBase"),
+                      m_strength(orig.Strength()), m_dexterity(orig.Dexterity()), m_constitution(orig.Constitution()) {}
+
+                StatBase(StatBase&&) = delete;
+
                 virtual ~StatBase() {}
+
+                StatBase& operator=(const StatBase& rhs)
+                {
+                    Strength(rhs.Strength());
+                    Dexterity(rhs.Dexterity());
+                    Constitution(rhs.Constitution());
+                    return *this;
+                }
+
+                StatBase& operator=(StatBase&&) = delete;
 
                 [[nodiscard]] inline const StatVal& Strength() const { return m_strength; }
                 [[nodiscard]] inline StatVal& Strength() { return m_strength; }
@@ -43,9 +60,12 @@ namespace NaM
                 [[nodiscard]] const std::string ToString() const
                 {
                     std::stringstream ss;
-                    ss << "    Strength: " << Strength() << std::endl
-                        << "   Dexterity: " << Dexterity() << std::endl
-                        << "Constitution: " << Constitution() << std::endl;
+                    ss << "[ "
+                        << "ID: " << GetID() << ", "
+                        << "Strength: " << Strength() << ", "
+                        << "Dexterity: " << Dexterity() << ", "
+                        << "Constitution: " << Constitution()
+                        << " ]";
                     return ss.str();
                 }
             };
