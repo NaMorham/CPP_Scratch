@@ -78,6 +78,32 @@ namespace NaM
             [[nodiscard]] std::string ToString() const;
         };
 
+        template<typename T>
+        class QueueWP : public Identifiable<QueueWP<T>>
+        {
+        private:
+            size_t m_size;
+            QueueWPNode_p<T> m_pFront;
+            QueueWPNode_p<T> m_pBack;
+
+        public:
+            QueueWP()
+            : Identifiable<QueueWP>("QueueWPNode"),
+                m_size{ 0 }, m_pFront{ nullptr }, m_pBack{ nullptr } {}
+            QueueWP(const QueueWP& orig);
+            QueueWP(QueueWP&& other);
+            virtual ~QueueWP();
+
+            [[nodiscard]] inline const size_t Size() const { return m_size; }
+
+            QueueWP& Push(const T& data);
+
+            [[nodiscard]] inline const QueueWPNode_p<T> Front() const { return m_pFront; }
+            [[nodiscard]] inline QueueWPNode_p<T> Front() { return m_pFront; }
+
+            [[nodiscard]] inline const QueueWPNode_p<T> Back() const { return m_pBack; }
+            [[nodiscard]] inline QueueWPNode_p<T> Back() { return m_pBack; }
+        };
     }  // end namespace CppScratch
 
 }  // end namespace NaM
@@ -86,6 +112,7 @@ namespace NaM
 using NaM::CppScratch::TestObjects::Point2D;
 using P2DQueueNode = NaM::CppScratch::QueueWPNode<Point2D>;
 using P2DQueueNode_p = NaM::CppScratch::QueueWPNode_p<Point2D>;
+using P2DQueue = NaM::CppScratch::QueueWP<Point2D>;
 using TEST_P2DQueueWPNode = NaM::CppScratch::TEST_QueueWPNode<Point2D>;
 
 NaM::CppScratch::_CounterVal g_counter;
@@ -114,7 +141,25 @@ std::ostream& operator<<(std::ostream& oss, const P2DQueueNode_p pNode)
     return oss;
 }
 
+std::ostream& operator<<(std::ostream& oss, const P2DQueue& queue)
+{
+    P2DQueueNode_p pNode{ queue.Front() };
+
+    oss << "Queue (" << queue.Id() << "), Size: " << queue.Size() << ", "
+        << "Front (0x" << (void*)queue.Front() << "), Back (0x" << (void*)queue.Back() << ")"
+        << std::endl;
+
+    while (pNode)
+    {
+        oss << g_counter << pNode << std::endl;
+        pNode = pNode->Next();
+    }
+
+    return oss;
+}
+
 void TestP2DNode();
+void TestP2DQueue();
 
 int main(int argc, char* argv[])
 {
@@ -123,6 +168,7 @@ int main(int argc, char* argv[])
     NaM::CppScratch::TestRunCerr run("Main");
 
     TestP2DNode();
+    TestP2DQueue();
 
     return EXIT_SUCCESS;
 }
@@ -135,12 +181,14 @@ namespace NaM
         template<typename T>
         QueueWPNode<T>::~QueueWPNode()
         {
+            /*
             QueueWPNode_p<T> pPrev{ Prev() };
             QueueWPNode_p<T> pNext{ Next() };
             if (m_pPrev)
                 m_pPrev->Next(pNext);
             if (m_pNext)
                 m_pNext->Prev(pPrev);
+            */
         }
 
         template<typename T>
@@ -166,6 +214,42 @@ namespace NaM
             return ss.str();
         }
 
+        //---------------------------------------------------------------------
+        template<typename T>
+        QueueWP<T>::QueueWP(const QueueWP<T>& orig)
+            : Identifiable("QueueWP")
+        {
+            std::cerr << "TODO: Copy constructor" << std::endl;
+        }
+        template<typename T>
+        QueueWP<T>::QueueWP(QueueWP<T>&& other)
+            : Identifiable("QueueWP")
+        {
+            std::cerr << "TODO: Move constructor" << std::endl;
+        }
+
+        template<typename T>
+        QueueWP<T>::~QueueWP()
+        {
+            std::cerr << "TODO: Destructor" << std::endl;
+        }
+
+        // push onto the back
+        template<typename T>
+        QueueWP<T>& QueueWP<T>::Push(const T& data)
+        {
+            QueueWPNode_p<T> pNewNode = new QueueWPNode<T>(data);
+            // the previous node is "ahead" in the queue
+            pNewNode->m_pPrev = m_pBack;
+            // pNewNode->m_pNext is all ready a nullptr
+            if (m_pBack)
+                m_pBack->m_pNext = pNewNode; // next is the node after this in the queue
+            m_pBack = pNewNode;
+            if (!m_pFront)
+                m_pFront = pNewNode;
+            return *this;
+        }
+
     }  // end namespace CppScratch
 
 }  // end namespace NaM
@@ -182,4 +266,26 @@ void TestP2DNode()
     TEST_P2DQueueWPNode::DeleteNode(pNode);
 
     std::cerr << g_counter << "Delete pNode: " << pNode << std::endl;
+}
+
+void TestP2DQueue()
+{
+    NaM::CppScratch::TestRunCerr testRun("Queue tests");
+
+    {
+        NaM::CppScratch::TestRunCerr testCase("Empty queue");
+
+        P2DQueue q;
+        std::cerr << g_counter << q << std::endl;
+    }
+
+    {
+        NaM::CppScratch::TestRunCerr testCase("Normal queue (push on back)");
+
+        P2DQueue q;
+        q.Push(Point2D{3, 4});
+        std::cerr << g_counter << q << std::endl;
+        q.Push(Point2D{ 5, 6 });
+        std::cerr << g_counter << q << std::endl;
+    }
 }
