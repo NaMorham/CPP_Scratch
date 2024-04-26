@@ -1,0 +1,11 @@
+#pragma once
+
+#define ValidateTestObjects_Version_Major @ValidateTestObjects_VERSION_MAJOR@
+#define ValidateTestObjects_Version_Minor @ValidateTestObjects_VERSION_MINOR@
+#define ValidateTestObjects_Version_Patch @ValidateTestObjects_VERSION_PATCH@
+#define ValidateTestObjects_Version_Tweak @ValidateTestObjects_VERSION_TWEAK@
+
+#define ValidateTestObjects_VersionShort "@ValidateTestObjects_VERSION_MAJOR@.@ValidateTestObjects_VERSION_MINOR@"
+#define ValidateTestObjects_VersionLong ValidateTestObjects_VersionShort".@ValidateTestObjects_VERSION_PATCH@"
+#define ValidateTestObjects_VersionFull ValidateTestObjects_VersionLong".@ValidateTestObjects_VERSION_TWEAK@"
+
