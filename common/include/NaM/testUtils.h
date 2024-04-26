@@ -1,7 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
+#include <cstdint>
 
 namespace NaM
 {
