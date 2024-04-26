@@ -6,6 +6,10 @@
 
 #include "customLinkedListVer.h"
 
+#include "NaM/identifiable.h"
+#include "NaM/testUtils.h"
+#include "NaM/TestObjects/testPoint2D.h"
+
 namespace NaM
 {
     namespace CppScratch
@@ -153,6 +157,7 @@ namespace NaM
 }; // end namespace NaM
 
 //------------------------------------------------------------------------
+#if 0
 struct Point2D
 {
     std::int32_t x{0}, y{ 0 };
@@ -169,8 +174,14 @@ std::ostream& operator<<(std::ostream& oss, const Point2D& pt)
     oss << "[" << pt.x << ", " << pt.y << "]";
     return oss;
 }
+#endif
 
 //------------------------------------------------------------------------
+using NaM::CppScratch::DASHES;
+using NaM::CppScratch::nullvalstr;
+using NaM::CppScratch::TestRunCerr;
+using NaM::CppScratch::TestObjects::Point2D;
+
 using P2D_Node = NaM::CppScratch::SingleLinkedListNode<Point2D>;
 using P2D_Node_p = NaM::CppScratch::SingleLinkedListNode_p<Point2D>;
 using TEST_P2D_Node = NaM::CppScratch::TEST_SingleLinkedListNode<Point2D>;
@@ -178,8 +189,10 @@ using TEST_P2D_Node = NaM::CppScratch::TEST_SingleLinkedListNode<Point2D>;
 using P2D_List = NaM::CppScratch::SingleLinkedList<Point2D>;
 using P2D_List_p = NaM::CppScratch::SingleLinkedList_p<Point2D>;
 
+#if 0
 const std::string DASHES(std::string(70, '-'));
 const std::string nullvalstr(std::string("0x").append(std::string(sizeof(P2D_Node_p), '0')));
+#endif
 
 std::ostream& operator<<(std::ostream& oss, const P2D_Node_p pNode)
 {
@@ -244,12 +257,14 @@ std::ostream& operator<<(std::ostream& oss, const P2D_List& theList)
     return oss;
 }
 
+#if 0
 const std::string& BoolStr(const bool& bVal)
 {
     static std::string trueString{"true"};
     static std::string falseString{"false"};
     return (bVal ? trueString : falseString);
 }
+#endif
 
 //------------------------------------------------------------------------
 void TestSLLNodes();
@@ -257,7 +272,8 @@ void TestSLLLists();
 
 int main(int argc, char* argv[])
 {
-    std::cout << "Version: " << CustomLinkedList_VersionFull << std::endl << std::endl;
+    std::cout << NaM::CppScratch::LastToken(argv[0])
+        << " Version: " << CustomLinkedList_VersionFull << std::endl << std::endl;
 
     TestSLLNodes();
     TestSLLLists();
@@ -268,6 +284,7 @@ int main(int argc, char* argv[])
 }
 
 //------------------------------------------------------------------------
+#if 0
 class _CounterVal
 {
 private:
@@ -281,7 +298,8 @@ std::ostream& operator<<(std::ostream& oss, const _CounterVal& counter)
 {
     oss << std::dec << std::setw(2) << counter.Count(); return oss;
 }
-_CounterVal g_counter;
+#endif
+NaM::CppScratch::_CounterVal g_counter;
 
 //------------------------------------------------------------------------
 namespace NaM
@@ -446,17 +464,19 @@ namespace NaM
             SingleLinkedListNode_p<T> pNode{Head()};
             while (pNode)
             {
-                ss << std::endl << "\tNode " << idx++ << ") " << (*pNode);
+                ss << std::endl << "\tNode " << idx++ << ") " << pNode->ToString();
                 pNode = pNode->Next();
             }
 
             return ss.str();
         }
 
-    };  // end namespace CppScratch
-};  // end namespace NaM
+    }  // end namespace CppScratch
+
+}  // end namespace NaM
 
 //------------------------------------------------------------------------
+#if 0
 class TestRunCerr
 {
 private:
@@ -488,6 +508,7 @@ public:
     TestRunCerr& operator=(TestRunCerr&) = delete;
 };
 std::uint64_t TestRunCerr::ms_runId = 0;
+#endif
 
 void TestSLLNodes()
 {
@@ -669,10 +690,12 @@ void TestSLLLists()
         TestRunCerr listRun("List IsEmpty");
 
         P2D_List list9;
-        std::cerr << g_counter << ") list9: is empty? " << BoolStr(list9.IsEmpty())
+        std::cerr << g_counter << ") list9: is empty? "
+            << NaM::CppScratch::TrueOrFalse(list9.IsEmpty())
             << ", " << list9 << std::endl;
         list9 += Point2D{-3, -4};
-        std::cerr << g_counter << ") list9: after append is empty? " << BoolStr(list9.IsEmpty())
+        std::cerr << g_counter << ") list9: after append is empty? "
+            << NaM::CppScratch::TrueOrFalse(list9.IsEmpty())
             << ", " << list9 << std::endl;
     }
 
