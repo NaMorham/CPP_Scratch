@@ -7,7 +7,7 @@
 
 #include "NaM/identifiable.h"
 #include "NaM/testUtils.h"
-#include "NaM/TestObjects/testObjects.h"
+#include "NaM/TestObjects/dummyData.h"
 
 namespace NaM
 {
