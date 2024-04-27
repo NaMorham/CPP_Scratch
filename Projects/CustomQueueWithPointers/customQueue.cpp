@@ -1,4 +1,7 @@
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <cmath>
 
 #include "customQueueVer.h"
 
@@ -121,7 +124,11 @@ namespace NaM
 
             [[nodiscard]] inline const QueueWPNode_p<T> Back() const { return m_pBack; }
             [[nodiscard]] inline QueueWPNode_p<T> Back() { return m_pBack; }
+
+            [[nodiscard]] const QueueWPNode_p<T> operator[](const size_t index) const;
+            [[nodiscard]] QueueWPNode_p<T> operator[](const size_t index);
         };
+
     }  // end namespace CppScratch
 
 }  // end namespace NaM
@@ -150,27 +157,11 @@ std::ostream& operator<<(std::ostream& oss, const P2DQueueNode& node)
 
 std::ostream& operator<<(std::ostream& oss, const P2DQueueNode_p pNode)
 {
-    /*
-    oss << "pNode (";
-    if (pNode)
-    {
-        oss << "0x"
-            << std::hex << std::setfill('0') << std::setw(sizeof(pNode))
-            << (void*)pNode
-            << std::dec
-            << ") -> [" << pNode->ToString() << "]";
-    }
-    else
-    {
-        oss << NaM::CppScratch::nullvalstr << ")";
-    }
-    /*/
     oss << "pNode (" << PtrString(pNode) << ")";
     if (pNode)
     {
         oss << " -> [" << pNode->ToString() << "]";
     }
-    //*/
     return oss;
 }
 
@@ -179,12 +170,11 @@ std::ostream& operator<<(std::ostream& oss, const P2DQueue& queue)
     P2DQueueNode_p pNode{ queue.Front() };
 
     oss << "Queue (" << queue.Id() << "), Size: " << queue.Size() << ", "
-        << "Front (0x" << (void*)queue.Front() << "), Back (0x" << (void*)queue.Back() << ")"
-        << std::endl;
+        << "Front (0x" << (void*)queue.Front() << "), Back (0x" << (void*)queue.Back() << ")";
 
     while (pNode)
     {
-        oss << g_counter << pNode << std::endl;
+        oss << std::endl << g_counter << pNode;
         pNode = pNode->Next();
     }
 
@@ -201,6 +191,37 @@ std::ostream& operator<<(std::ostream& oss, const Point2D* pPoint)
     return oss;
 }
 
+std::string QueuePointsAsString(const P2DQueue& queue, size_t ptsPerLine = 4)
+{
+    std::stringstream ss;
+    P2DQueueNode_p pNode{ queue.Front() };
+    size_t count{ 0 }, total{ 0 };
+    if (ptsPerLine == 0)
+    {
+        ptsPerLine = SIZE_MAX;
+    }
+
+    while (pNode)
+    {
+        if ((count >= ptsPerLine) && total)
+        {
+            ss << " <-> " << std::endl;
+            count = 0;
+        }
+        if (count > 0)
+        {
+            ss << " <-> ";
+        }
+        ss << pNode->Data();
+        pNode = pNode->Next();
+        ++total;
+        ++count;
+    }
+
+    return ss.str();
+}
+
+//-----------------------------------------------------------------------------
 void TestP2DNode();
 void TestP2DQueue();
 
@@ -238,19 +259,26 @@ namespace NaM
 
         template<typename T>
         QueueWP<T>::QueueWP(const QueueWP<T>& orig)
-            : Identifiable("QueueWP")
+            : Identifiable<QueueWP>("QueueWP")
         {
             std::cerr << "TODO: Copy constructor" << std::endl;
         }
+
         template<typename T>
         QueueWP<T>::QueueWP(QueueWP<T>&& other)
-            : Identifiable("QueueWP")
+            : Identifiable<QueueWP>("QueueWP")
         {
             std::cerr << "TODO: Move constructor" << std::endl;
         }
 
         template<typename T>
         QueueWP<T>::~QueueWP()
+        {
+            Clear();
+        }
+
+        template<typename T>
+        QueueWP<T>& QueueWP<T>::Clear()
         {
             QueueWPNode_p<T> pNode{Front()};
             while (pNode)
@@ -259,12 +287,6 @@ namespace NaM
                 delete pNode;
                 pNode = pNext;
             }
-        }
-
-        template<typename T>
-        QueueWP<T>& QueueWP<T>::Clear()
-        {
-            std::cerr << "TODO: Clear the queue" << std::endl;
             return *this;
         }
 
@@ -274,13 +296,18 @@ namespace NaM
         {
             QueueWPNode_p<T> pNewNode = new QueueWPNode<T>(data);
             // the previous node is "ahead" in the queue
+            // next is the node after this in the queue
             pNewNode->m_pPrev = m_pBack;
             // pNewNode->m_pNext is all ready a nullptr
             if (m_pBack)
-                m_pBack->m_pNext = pNewNode; // next is the node after this in the queue
+            {
+                m_pBack->m_pNext = pNewNode;
+            }
             m_pBack = pNewNode;
             if (!m_pFront)
+            {
                 m_pFront = pNewNode;
+            }
             ++m_size;
             return *this;
         }
@@ -295,12 +322,16 @@ namespace NaM
                 data = m_pFront->Data();
                 m_pFront = pPoppedNode->Next();
                 if (m_pFront)
+                {
                     m_pFront->m_pPrev = nullptr;
+                }
                 delete pPoppedNode;
                 --m_size;
             }
             if (!m_pFront)
+            {
                 m_pBack = nullptr;
+            }
             return *this;
         }
 
@@ -308,26 +339,49 @@ namespace NaM
         template<typename T>
         const T* QueueWP<T>::Peek() const
         {
-            if (Front())
-                return &(Front()->Data());
+            if (m_pFront)
+            {
+                return &(m_pFront->Data());
+            }
             else
+            {
                 return nullptr;
+            }
         }
 
         // peek defaults to front
         template<typename T>
         T* QueueWP<T>::Peek()
         {
-            if (Front())
-                return &(Front()->Data());
+            if (m_pFront)
+            {
+                return &(m_pFront->Data());
+            }
             else
+            {
                 return nullptr;
+            }
         }
 
         // push onto front
         template<typename T>
         QueueWP<T>& QueueWP<T>::PushFront(const T& data)
         {
+            QueueWPNode_p<T> pNewNode = new QueueWPNode<T>(data);
+            // the previous node is "ahead" in the queue
+            // next is the node after this in the queue
+            pNewNode->m_pNext = m_pFront;
+            // pNewNode->m_pPrev is all ready a nullptr
+            if (m_pFront)
+            {
+                m_pFront->m_pPrev = pNewNode;
+            }
+            m_pFront = pNewNode;
+            if (!m_pBack)
+            {
+                m_pBack = pNewNode;
+            }
+            ++m_size;
             return *this;
         }
 
@@ -343,9 +397,13 @@ namespace NaM
         const T* QueueWP<T>::PeekBack() const
         {
             if (Back())
+            {
                 return &(Back()->Data);
+            }
             else
+            {
                 return nullptr;
+            }
         }
 
         // peek at the back
@@ -353,9 +411,62 @@ namespace NaM
         T* QueueWP<T>::PeekBack()
         {
             if (Back())
+            {
                 return &(Back()->Data());
+            }
             else
+            {
                 return nullptr;
+            }
+        }
+
+        template<typename T>
+        const QueueWPNode_p<T> QueueWP<T>::operator[](const size_t index) const
+        {
+            if (!IsEmpty())
+            {
+                // nothing to index
+                return nullptr;
+            }
+            else if (index >= m_size)
+            {
+                // past the end
+                return nullptr;
+            }
+            else
+            {
+                QueueWPNode_p<T> pNode{ m_pFront };
+                for (size_t idx = 0; idx <= index; ++idx)
+                {
+                    pNode = pNode->Next();
+                }
+                return pNode;
+            }
+        }
+
+        template<typename T>
+        QueueWPNode_p<T> QueueWP<T>::operator[](const size_t index)
+        {
+            if (IsEmpty())
+            {
+                // nothing to index
+                return nullptr;
+            }
+            else if (index >= m_size)
+            {
+                // past the end
+                return nullptr;
+            }
+            else
+            {
+                QueueWPNode_p<T> pNode{ m_pFront };
+                size_t idx{ 0 };
+                while (idx++ < index)
+                {
+                    pNode = pNode->Next();
+                }
+                return pNode;
+            }
         }
 
     }  // end namespace CppScratch
@@ -383,6 +494,12 @@ private:
 public:
     [[nodiscard]] inline const std::int32_t GetCount() const { return ms_count; }
     [[nodiscard]] inline const std::int32_t Count() const { return ++ms_count; }
+    const std::int32_t SetCount(const std::int32_t newCount)
+    {
+        ms_count = newCount;
+        return ms_count;
+    }
+    inline const std::int32_t ResetCount() { return SetCount(0); }
 
     operator std::int32_t() const { return Count(); }
 };
@@ -398,6 +515,7 @@ void TestP2DQueue()
     NaM::CppScratch::TestRunCerr testRun("Queue tests");
     i32ValCtr iCtr;
 
+    // Create and empty queue and print it to verify
     {
         NaM::CppScratch::TestRunCerr testCase("Empty queue");
 
@@ -407,6 +525,7 @@ void TestP2DQueue()
             << TrueOrFalse(q.IsEmpty()) << std::endl;
     }
 
+    // Create an empty queue and print it to verify
     {
         NaM::CppScratch::TestRunCerr testCase("Normal queue (push on back)");
 
@@ -419,57 +538,164 @@ void TestP2DQueue()
             << TrueOrFalse(q.IsEmpty()) << std::endl;
     }
 
+    // Create and populate a queue to confirm we peek at the front
     {
         NaM::CppScratch::TestRunCerr testCase("Normal queue (peek at front)");
 
         P2DQueue q;
         size_t numPts{ 4 };
+
+        std::cerr << std::endl;
+        std::cerr << "Push " << numPts << " point" << (numPts == 1 ? "" : "s") << " onto the back" << std::endl;
         for (size_t i = 0; i < numPts; ++i)
         {
-            q.Push(Point2D{ iCtr, iCtr.GetCount() });
+            Point2D pt{ iCtr, iCtr.GetCount() };
+            std::cerr << " > Push point " << pt << std::endl;
+            q.Push(pt);
         }
         std::cerr << g_counter << q << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Peek at the front" << std::endl;
         Point2D* pPt = q.Peek();
         std::cerr << g_counter << pPt << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Push " << numPts << " point" << (numPts == 1 ? "" : "s") << " onto the back" << std::endl;
         for (size_t i = 0; i < numPts; ++i)
         {
-            q.Push(Point2D{ iCtr, iCtr.GetCount() });
+            Point2D pt{ iCtr, iCtr.GetCount() };
+            std::cerr << " > Push point " << pt << std::endl;
+            q.Push(pt);
         }
         std::cerr << g_counter << q << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << g_counter << "Queue (" << q.Id() << ") = "
+            << std::endl << QueuePointsAsString(q, 4) << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Peek at the front" << std::endl;
         pPt = q.Peek();
         std::cerr << g_counter << pPt << std::endl;
         std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
             << TrueOrFalse(q.IsEmpty()) << std::endl;
     }
 
-
+    // Create and populate a queue and confirm we pop data off the front
     {
         NaM::CppScratch::TestRunCerr testCase("Normal queue (pop off front)");
 
         P2DQueue q;
+        Point2D pt;
         size_t numPts{ 4 };
+
+        std::cerr << "Push " << numPts << " point" << (numPts == 1 ? "" : "s") << " onto the back" << std::endl;
         for (size_t i = 0; i < numPts; ++i)
         {
-            q.Push(Point2D{ iCtr, iCtr.GetCount() });
+            Point2D pt{ iCtr, iCtr.GetCount() };
+            std::cerr << " > Push point " << pt << std::endl;
+            q.Push(pt);
         }
         std::cerr << g_counter << q << std::endl;
 
-        std::cerr << g_counter << "Pop()" << std::endl;
-        Point2D pt;
+        std::cerr << std::endl;
+        std::cerr << "Pop point off the front" << std::endl;
         q.Pop(pt);
         std::cerr << g_counter << q << std::endl;
         std::cerr << g_counter << "Popped point = " << pt << std::endl;
         std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
             << TrueOrFalse(q.IsEmpty()) << std::endl;
 
+        // Pop until empty
+        std::cerr << std::endl;
+        std::cerr << "Pop until empty" << std::endl;
         while (!q.IsEmpty())
         {
             Point2D pt2;
             q.Pop(pt2);
-            std::cerr << g_counter << q << std::endl;
-            std::cerr << g_counter << "Popped point = " << pt << std::endl;
-            std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
-                << TrueOrFalse(q.IsEmpty()) << std::endl;
+            std::cerr << g_counter << "Popped point = " << pt2 << std::endl;
         }
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
+            << TrueOrFalse(q.IsEmpty()) << std::endl;
+    }
+
+    // Create and populate a queue to confirm we can push onto the front
+    {
+        NaM::CppScratch::TestRunCerr testCase("Normal queue (push in front)");
+
+        P2DQueue q;
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << "Push 1st point onto the front" << std::endl;
+        q.PushFront(Point2D{ iCtr, iCtr.GetCount() });
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << "Push 2nd point onto the front" << std::endl;
+        q.PushFront(Point2D{ iCtr, iCtr.GetCount() });
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << "Push 3rd point onto the front" << std::endl;
+        q.PushFront(Point2D{ iCtr, iCtr.GetCount() });
+        std::cerr << g_counter << q << std::endl;
+    }
+
+    // Create and populate a queue to confirm we can push and pop at the front
+    {
+        NaM::CppScratch::TestRunCerr testCase("Normal queue (push in front, pop from front) - Stack");
+
+        P2DQueue q;
+        Point2D popped;
+        size_t numPts{ 4 };
+
+        std::cerr << "Push 1 point onto the front" << std::endl;
+        q.PushFront(Point2D{ iCtr, iCtr.GetCount() });
+        std::cerr << g_counter << q << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Pop 1 point from the front" << std::endl;
+        q.Pop(popped);
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << g_counter << "Popped point = " << popped << std::endl;
+        std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
+            << TrueOrFalse(q.IsEmpty()) << std::endl;
+    }
+
+    // Create and populate a queue to confirm we can index
+    {
+        NaM::CppScratch::TestRunCerr testCase("Normal queue for index [] calls");
+
+        P2DQueue q;
+        Point2D pt;
+        P2DQueueNode_p pPtNode;
+        size_t numPts{ 7 };
+        size_t i{ 0 };
+
+        std::cerr << "Try and index an empty queue" << std::endl;
+        std::cerr << g_counter << q << std::endl;
+        pPtNode = q[0]; // should be null
+        std::cerr << g_counter << pPtNode << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Push " << numPts << " point" << (numPts == 1 ? "" : "s") << " onto the back" << std::endl;
+        for (i = 0; i < numPts; ++i)
+        {
+            Point2D pt{ iCtr, iCtr.GetCount() };
+            std::cerr << " > Push point " << pt << std::endl;
+            q.Push(pt);
+        }
+        std::cerr << g_counter << q << std::endl;
+
+        std::cerr << std::endl;
+        std::cerr << "Loop through by index" << std::endl;
+        for (i = 0; i < q.Size(); ++i)
+        {
+            pPtNode = q[i];
+            std::cerr << g_counter << "Queue[" << i << "] = " << pPtNode << std::endl;
+        }
+        std::cerr << std::endl;
+
+        i = std::ceil(q.Size() / 2);
+        std::cerr << "Jump to middle index: " << i << std::endl;
+        pPtNode = q[i];
+        std::cerr << g_counter << "Queue[" << i << "] = " << pPtNode << std::endl;
     }
 }
