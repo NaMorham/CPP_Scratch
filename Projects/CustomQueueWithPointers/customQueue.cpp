@@ -389,6 +389,22 @@ namespace NaM
         template<typename T>
         QueueWP<T>& QueueWP<T>::PopBack(T& data)
         {
+            if (m_pBack)
+            {
+                QueueWPNode_p<T> pPoppedNode{Back()};
+                data = m_pBack->Data();
+                m_pBack = pPoppedNode->Prev();
+                if (m_pBack)
+                {
+                    m_pBack->m_pNext = nullptr;
+                }
+                delete pPoppedNode;
+                --m_size;
+            }
+            if (!m_pBack)
+            {
+                m_pFront = nullptr;
+            }
             return *this;
         }
 
