@@ -190,12 +190,15 @@ bool AddToSet(const TypeID& id, std::set<TypeID>& theSet)
 }
 
 //-----------------------------------------------------------------------------
+using NaM::CppScratch::FirstToken;
+using NaM::CppScratch::LastToken;
+
 int main(int argc, char *argv[])
 {
     const std::string dashes(70, '-');
 
-    std::cout << NaM::CppScratch::LastToken(argv[0]) << " Version " << UniqueIdTest_VersionFull
-        << std::endl << std::endl;
+    std::cout << FirstToken(LastToken(argv[0], NaM::CppScratch::pathSeparators), ".")
+        << " Version " << UniqueIdTest_VersionFull << std::endl << std::endl;
 
     {
         std::cout << dashes << std::endl << "class Test1:" << std::endl;

@@ -122,42 +122,14 @@ namespace NaM
 }  // end namespace NaM
 
 //------------------------------------------------------------------------
-#if 0
-std::string LastToken(const std::string& in, const std::string seps = "\\/:")
-{
-    std::size_t lastpos(in.find_last_of(seps));
-    if (in.empty())
-    {
-        return std::string{""};
-    }
-    else if (lastpos == std::string::npos)
-    {
-        return in;
-    }
-    else
-    {
-        std::string outString(in.substr(lastpos + 1));
-        return outString;
-    }
-}
-
-const std::string DASHES(std::string(70, '-'));
-const std::string EQUALS(std::string(70, '='));
-const std::string nullvalstr(std::string("0x").append(std::string(sizeof(nullptr_t), '0')));
-
-const std::string& BoolStr(const bool& bVal)
-{
-    static std::string trueString{"true"};
-    static std::string falseString{"false"};
-    return (bVal ? trueString : falseString);
-}
-#endif
-
-//------------------------------------------------------------------------
 using NaM::CppScratch::nullvalstr;
 using NaM::CppScratch::DASHES;
 using NaM::CppScratch::EQUALS;
+
 using NaM::CppScratch::TestRunCerr;
+
+using NaM::CppScratch::FirstToken;
+using NaM::CppScratch::LastToken;
 
 void DummyDataTests();
 void StackWPNodeTests();
@@ -165,8 +137,8 @@ void StackWPTests();
 
 int main(int argc, char* argv[])
 {
-    std::cout << NaM::CppScratch::LastToken(argv[0]) << " Version " 
-        << CustomStackWithPointers_VersionFull << std::endl;
+    std::cout << FirstToken(LastToken(argv[0], NaM::CppScratch::pathSeparators), ".")
+        << " Version " << CustomStackWithPointers_VersionFull << std::endl;
 
     DummyDataTests();
     StackWPNodeTests();
@@ -175,25 +147,6 @@ int main(int argc, char* argv[])
     std::cerr << std::endl << std::endl;
     return 0;
 }
-
-#if 0
-//------------------------------------------------------------------------
-class _CounterVal
-{
-private:
-    static std::uint64_t ms_count;
-public:
-    [[nodiscard]] inline const std::uint64_t GetCount() const { return ms_count; }
-    [[nodiscard]] inline const std::uint64_t Count() const { return ++ms_count; }
-};
-std::uint64_t _CounterVal::ms_count = 0;
-std::ostream& operator<<(std::ostream& oss, const _CounterVal& counter)
-{
-    oss << std::dec << std::setfill(' ') << std::setw(3) << counter.Count() << ") ";
-    return oss;
-}
-_CounterVal g_counter;
-#endif
 
 //------------------------------------------------------------------------
 namespace NaM
@@ -282,99 +235,7 @@ namespace NaM
 }  // end namespace NaM
 
 //------------------------------------------------------------------------
-#if 0
-class TestRunCerr
-{
-private:
-    static std::uint64_t ms_runId;
-    static size_t ms_depth;
-    std::uint64_t m_runId;
-    std::string m_name;
-    const std::string& m_decorator;
-
-public:
-    TestRunCerr() = delete;
-    TestRunCerr(const TestRunCerr&) = delete;
-    TestRunCerr(TestRunCerr&&) = delete;
-
-    TestRunCerr(const std::string& name)
-        : m_runId(++ms_runId), m_name(name), m_decorator(ms_depth == 0 ? EQUALS : DASHES)
-    {
-        ++ms_depth;
-        std::cerr << m_decorator << std::endl;
-        std::cerr << ">>> Start run " << RunId() << ": " << Name() << " >>>" << std::endl;
-        std::cerr << m_decorator << std::endl;
-    }
-    ~TestRunCerr()
-    {
-        std::cerr << m_decorator << std::endl;
-        std::cerr << "<<< End run " << RunId() << ": " << Name() << " <<<" << std::endl;
-        std::cerr << m_decorator << std::endl;
-        --ms_depth;
-        if (ms_depth == 0)
-            std::cerr << std::endl;
-        m_name.clear();
-        m_runId = std::uint64_t(0);
-    }
-
-    [[nodiscard]] inline const std::uint64_t RunId() const { return m_runId; }
-    [[nodiscard]] inline const std::string& Name() const { return m_name; }
-
-    TestRunCerr& operator=(const TestRunCerr&) = delete;
-    TestRunCerr& operator=(TestRunCerr&) = delete;
-};
-std::uint64_t TestRunCerr::ms_runId = 0;
-size_t TestRunCerr::ms_depth = 0;
-#endif
-
 NaM::CppScratch::_CounterVal g_counter;
-
-#if 0
-struct DummyData
-{
-    std::string name;
-    std::int32_t val;
-    bool is;
-
-    DummyData()
-        : name(""), val(INT32_MAX), is{ false } {}
-    DummyData(const std::string& _name, const std::int32_t _val, const bool& _is)
-        : name(_name), val(_val), is{ _is } {}
-    DummyData(const DummyData& orig)
-        : name(orig.name), val(orig.val), is(orig.is) {}
-    DummyData(DummyData& other)
-        : name(other.name), val(other.val), is(other.is) {}
-    virtual ~DummyData() { name.clear(); }
-
-    DummyData& operator=(const DummyData& rhs)
-    {
-        name.assign(rhs.name);
-        val = rhs.val;
-        is = rhs.is;
-        return *this;
-    }
-    DummyData& operator=(DummyData&& rhs) noexcept
-    {
-        name = rhs.name;
-        val = rhs.val;
-        is = rhs.is;
-        return *this;
-    }
-    const std::string ToString() const
-    {
-        std::stringstream ss;
-        ss << "[ Name: \"" << name << "\", Value: " << val << ", Is: " 
-            << NaM::CppScratch::TrueOrFalse(is) << " ]";
-        return ss.str();
-    }
-};
-
-std::ostream& operator<<(std::ostream& oss, const DummyData& dummy)
-{
-    oss << dummy.ToString();
-    return oss;
-}
-#endif
 
 //------------------------------------------------------------------------
 using NaM::CppScratch::TestObjects::DummyData;

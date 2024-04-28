@@ -1,0 +1,10 @@
+#pragma once
+
+#define CustomQueueWithPointers_Version_Major @CustomQueueWithPointers_VERSION_MAJOR@
+#define CustomQueueWithPointers_Version_Minor @CustomQueueWithPointers_VERSION_MINOR@
+#define CustomQueueWithPointers_Version_Patch @CustomQueueWithPointers_VERSION_PATCH@
+#define CustomQueueWithPointers_Version_Tweak @CustomQueueWithPointers_VERSION_TWEAK@
+
+#define CustomQueueWithPointers_VersionShort "@CustomQueueWithPointers_VERSION_MAJOR@.@CustomQueueWithPointers_VERSION_MINOR@"
+#define CustomQueueWithPointers_VersionLong CustomQueueWithPointers_VersionShort".@CustomQueueWithPointers_VERSION_PATCH@"
+#define CustomQueueWithPointers_VersionFull CustomQueueWithPointers_VersionLong".@CustomQueueWithPointers_VERSION_TWEAK@"

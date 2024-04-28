@@ -72,14 +72,17 @@ void TestPoint2D();
 
 using NaM::CppScratch::TestRunCerr;
 
+using NaM::CppScratch::FirstToken;
+using NaM::CppScratch::LastToken;
+
 NaM::CppScratch::_CounterVal g_counter;
 
 // -----------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
     std::cout << std::endl
-        << NaM::CppScratch::LastToken(argv[0]) << std::endl
-        << std::endl;
+        << FirstToken(LastToken(argv[0], NaM::CppScratch::pathSeparators), ".")
+        << std::endl << std::endl;
 
     TestRunCerr run("Main");
 
