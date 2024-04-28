@@ -13,6 +13,7 @@ set (HDRS
 )
 
 set (CMN_HDRS
+    ${Common_HEADERS}NaM/identifiable.h
     ${Common_HEADERS}NaM/testUtils.h
 )
 

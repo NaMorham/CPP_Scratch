@@ -47,7 +47,7 @@ namespace NaM
         };
 
         template <typename T, class Fn /*= std::less_equal<T>*/ >
-        class BinaryTreeWPNode : public Identifiable<BinaryTreeWPNode<T>>
+        class BinaryTreeWPNode : public Identifiable<BinaryTreeWPNode<T, Fn>>
         {
         private:
             friend class BinaryTreeWP<T, Fn>;
@@ -58,7 +58,7 @@ namespace NaM
             BinaryTreeWPNode<T, Fn>* m_pParent;
             BinaryTreeWPNode<T, Fn>* m_pLeft;
             BinaryTreeWPNode<T, Fn>* m_pRight;
-            Fn m_comp;
+            Fn compare_less_equal;
 
         protected:
             BinaryTreeWPNode(const T& data)
@@ -88,22 +88,22 @@ namespace NaM
 
             [[nodiscard]] const bool operator<=(const BinaryTreeWPNode<T, Fn>& rhs)
             {
-                return m_comp(m_data, rhs.Data());
+                return compare_less_equal(m_data, rhs.Data());
             }
         };
 
         template <typename T, class Fn /*= std::less_equal<T>*/ >
-        class BinaryTreeWP : public Identifiable<BinaryTreeWP<T>>
+        class BinaryTreeWP : public Identifiable<BinaryTreeWP<T, Fn>>
         {
         protected:
         private:
             size_t m_depth;
-            Fn comp_less_equal;
-            BinaryTreeWPNode<T>* m_pRoot;
+            Fn compare_less_equal;
+            BinaryTreeWPNode<T, Fn>* m_pRoot;
 
         public:
             BinaryTreeWP()
-                : Identifiable("BinaryTreeWP"), m_depth{ 0 }, comp_less_equal(Fn), m_pRoot{ nullptr } {}
+                : Identifiable<BinaryTreeWP>("BinaryTreeWP"), m_depth{ 0 }, m_pRoot{ nullptr } {}
         };
 
     }  // end namespace CppScratch
