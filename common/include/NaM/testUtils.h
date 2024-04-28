@@ -12,7 +12,6 @@ namespace NaM
         const std::string DASHES(std::string(70, '-'));
         const std::string EQUALS(std::string(70, '='));
         const std::string HASHES(std::string(70, '#'));
-        //const std::string nullvalstr(std::string("0x").append(std::string(sizeof(nullptr_t), '0')));
         const std::string calcNullStr()
         {
             std::stringstream ss;
