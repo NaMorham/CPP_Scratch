@@ -136,6 +136,8 @@ namespace NaM
 //-----------------------------------------------------------------------------
 using NaM::CppScratch::PtrString;
 using NaM::CppScratch::TrueOrFalse;
+using NaM::CppScratch::FirstToken;
+using NaM::CppScratch::LastToken;
 
 using NaM::CppScratch::TestObjects::Point2D;
 
@@ -227,7 +229,7 @@ void TestP2DQueue();
 
 int main(int argc, char* argv[])
 {
-    std::cout << NaM::CppScratch::FirstToken(NaM::CppScratch::LastToken(argv[0]), ".") << std::endl;
+    std::cout << FirstToken(LastToken(argv[0], NaM::CppScratch::pathSeparators), ".") << std::endl;
 
     NaM::CppScratch::TestRunCerr run("Main");
 
@@ -714,4 +716,36 @@ void TestP2DQueue()
         pPtNode = q[i];
         std::cerr << g_counter << "Queue[" << i << "] = " << pPtNode << std::endl;
     }
+
+    {
+        NaM::CppScratch::TestRunCerr testCase("Push and PopBack test");
+
+        P2DQueue q;
+        Point2D pt;
+
+        std::cerr << "Push a point to back.   Push()" << std::endl;
+        q.Push(Point2D{ iCtr, iCtr.GetCount() });
+        std::cerr << g_counter << q << std::endl;
+
+        std::cerr << "Pop a point off the back.   PopBack()" << std::endl;
+        q.PopBack(pt);
+        std::cerr << g_counter << q << std::endl;
+        std::cerr << g_counter << "Popped point = " << pt << std::endl;
+        std::cerr << g_counter << "Queue (" << q.Id() << ").IsEmpty() = "
+            << TrueOrFalse(q.IsEmpty()) << std::endl;
+    }
+
+    /*
+    {
+        NaM::CppScratch::TestRunCerr testCase("Normal queue for index [] calls");
+
+        P2DQueue q;
+        Point2D pt;
+        P2DQueueNode_p pPtNode;
+        size_t numPts{ 7 };
+        size_t i{ 0 };
+
+        std::cerr << "Try and index an empty queue" << std::endl;
+    }
+    //*/
 }

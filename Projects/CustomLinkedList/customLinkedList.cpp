@@ -179,6 +179,10 @@ std::ostream& operator<<(std::ostream& oss, const Point2D& pt)
 //------------------------------------------------------------------------
 using NaM::CppScratch::DASHES;
 using NaM::CppScratch::nullvalstr;
+
+using NaM::CppScratch::FirstToken;
+using NaM::CppScratch::LastToken;
+
 using NaM::CppScratch::TestRunCerr;
 using NaM::CppScratch::TestObjects::Point2D;
 
@@ -272,7 +276,7 @@ void TestSLLLists();
 
 int main(int argc, char* argv[])
 {
-    std::cout << NaM::CppScratch::LastToken(argv[0])
+    std::cout << FirstToken(LastToken(argv[0], NaM::CppScratch::pathSeparators), ".")
         << " Version: " << CustomLinkedList_VersionFull << std::endl << std::endl;
 
     TestSLLNodes();

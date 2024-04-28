@@ -20,6 +20,9 @@ namespace NaM
             return ss.str();
         }
         const std::string nullvalstr(calcNullStr());
+        const std::string pathSeparators("\\/:");
+        const std::string wsSeparators("\t \v");
+        const std::string lineEndSeparators("\r\n");
 
         //------------------------------------------------------------------------
         const std::string& TrueOrFalse(const bool& value)
@@ -29,7 +32,7 @@ namespace NaM
             return (value ? trueString : falseString);
         }
 
-        std::string LastToken(const std::string& in, const std::string seps = "\\/:")
+        std::string LastToken(const std::string& in, const std::string &seps = wsSeparators)
         {
             std::size_t lastpos(in.find_last_of(seps));
             if (in.empty())
@@ -47,7 +50,7 @@ namespace NaM
             }
         }
 
-        std::string FirstToken(const std::string& in, const std::string seps = "\\/:")
+        std::string FirstToken(const std::string& in, const std::string& seps = wsSeparators)
         {
             std::size_t firstpos(in.find_first_of(seps));
             if (in.empty())
@@ -61,6 +64,44 @@ namespace NaM
             else
             {
                 std::string outString(in.substr(0, firstpos));
+                return outString;
+            }
+        }
+
+        std::string SplitLastToken(const std::string& in, std::string& remainder, const std::string& seps = wsSeparators)
+        {
+            std::size_t lastpos(in.find_last_of(seps));
+            if (in.empty())
+            {
+                return std::string{""};
+            }
+            else if (lastpos == std::string::npos)
+            {
+                return in;
+            }
+            else
+            {
+                std::string outString(in.substr(lastpos + 1));
+                remainder.assign(in.substr(0, lastpos));
+                return outString;
+            }
+        }
+
+        std::string SplitFirstToken(const std::string& in, std::string& remainder, const std::string& seps = wsSeparators)
+        {
+            std::size_t firstpos(in.find_first_of(seps));
+            if (in.empty())
+            {
+                return std::string{""};
+            }
+            else if (firstpos == std::string::npos)
+            {
+                return in;
+            }
+            else
+            {
+                std::string outString(in.substr(0, firstpos));
+                remainder.assign(in.substr(firstpos+1));
                 return outString;
             }
         }
