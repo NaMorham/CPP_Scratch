@@ -1,0 +1,10 @@
+#pragma once
+
+#define BinaryTreeWithPointers_Version_Major @BinaryTreeWithPointers_VERSION_MAJOR@
+#define BinaryTreeWithPointers_Version_Minor @BinaryTreeWithPointers_VERSION_MINOR@
+#define BinaryTreeWithPointers_Version_Patch @BinaryTreeWithPointers_VERSION_PATCH@
+#define BinaryTreeWithPointers_Version_Tweak @BinaryTreeWithPointers_VERSION_TWEAK@
+
+#define BinaryTreeWithPointers_VersionShort "@BinaryTreeWithPointers_VERSION_MAJOR@.@BinaryTreeWithPointers_VERSION_MINOR@"
+#define BinaryTreeWithPointers_VersionLong BinaryTreeWithPointers_VersionShort".@BinaryTreeWithPointers_VERSION_PATCH@"
+#define BinaryTreeWithPointers_VersionFull BinaryTreeWithPointers_VersionLong".@BinaryTreeWithPointers_VERSION_TWEAK@"

@@ -7,6 +7,7 @@ add_subdirectory("CustomQueueWithPointers")
 add_subdirectory("CustomStackWithPointers")
 add_subdirectory("UniqueIdTest")
 add_subdirectory("ValidateTestObjects")
+add_subdirectory("BinaryTreeWithPointers")
 
 ################
 
