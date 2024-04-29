@@ -175,29 +175,35 @@ namespace NaM
 //-----------------------------------------------------------------------------
 void TestNode()
 {
-    TestRunCerr suite("Test B-Tree Node");
-    Int32Node_TEST test;
+    {
+        TestRunCerr suite("Test B-Tree Node");
+        Int32Node_TEST test;
 
-    Int32Node_p pNewNode = test.CreateNode(42);
-    std::cerr << g_counter << pNewNode << std::endl;
+        Int32Node_p pNewNode = test.CreateNode(42);
+        std::cerr << g_counter << pNewNode << std::endl;
 
-    test.DeleteNode(pNewNode);
-    std::cerr << g_counter << pNewNode << std::endl;
+        test.DeleteNode(pNewNode);
+        std::cerr << g_counter << pNewNode << std::endl;
 
-    pNewNode = test.CreateNode(42);
-    Int32Node_p pNode2 = test.CreateNode(12);
-    bool comp = ((*pNode2) <= (*pNewNode));
-    std::cerr << g_counter << "(*pNode2 <= *pNewNode) = " << TrueOrFalse(comp) << std::endl;
-    test.DeleteNode(pNewNode);
+        pNewNode = test.CreateNode(42);
+        Int32Node_p pNode2 = test.CreateNode(12);
+        bool comp = ((*pNode2) <= (*pNewNode));
+        std::cerr << g_counter << "(*pNode2 <= *pNewNode) = " << TrueOrFalse(comp) << std::endl;
+        test.DeleteNode(pNewNode);
+    }
 
-    NaM::CppScratch::TEST_BinaryTreeWPNode<int32_t> test2;
-    NaM::CppScratch::BinaryTreeWPNode_p<int32_t> pNode3, pNode4;
-    pNode3 = test2.CreateNode(13);
-    std::cerr << g_counter << pNode3 << std::endl;
-    pNode4 = test2.CreateNode(7);
-    std::cerr << g_counter << pNode4 << std::endl;
-    std::cerr << g_counter << "(*pNode3 <= *pNode4) = " << TrueOrFalse((*pNode3) <= (*pNode4)) << std::endl;
-    std::cerr << g_counter << "(*pNode4 <= *pNode3) = " << TrueOrFalse((*pNode4) <= (*pNode3)) << std::endl;
-    test.DeleteNode(pNode4);
-    test.DeleteNode(pNode3);
+    {
+        TestRunCerr suite("Test B-Tree Node (default comparator)");
+        NaM::CppScratch::TEST_BinaryTreeWPNode<int32_t> test2;
+
+        NaM::CppScratch::BinaryTreeWPNode_p<int32_t> pNode3, pNode4;
+        pNode3 = test2.CreateNode(13);
+        std::cerr << g_counter << pNode3 << std::endl;
+        pNode4 = test2.CreateNode(7);
+        std::cerr << g_counter << pNode4 << std::endl;
+        std::cerr << g_counter << "(*pNode3 <= *pNode4) = " << TrueOrFalse((*pNode3) <= (*pNode4)) << std::endl;
+        std::cerr << g_counter << "(*pNode4 <= *pNode3) = " << TrueOrFalse((*pNode4) <= (*pNode3)) << std::endl;
+        test2.DeleteNode(pNode4);
+        test2.DeleteNode(pNode3);
+    }
 }
