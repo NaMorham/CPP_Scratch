@@ -75,7 +75,7 @@ namespace NaM
         TypeID_t Identifiable<T>::ms_objId{0};
 
         template<typename T>
-        TypeID_t Identifiable<T>::ms_objCount{0};
+        size_t Identifiable<T>::ms_objCount{0};
 
         template<typename T>
         std::string Identifiable<T>::ms_typename{""};
