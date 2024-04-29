@@ -341,7 +341,7 @@ namespace NaM
             while (pNode)
             {
                 SingleLinkedListNode_p<T> pNext{pNode->Next()};
-                if (m_pTail = pNode)
+                if (m_pTail == pNode)
                     m_pTail = nullptr;
                 delete pNode;
                 m_pHead = pNext;
@@ -402,7 +402,7 @@ namespace NaM
                 SingleLinkedListNode_p<T> pPrev{m_pHead};
                 T tailData(m_pTail->Data());
                 // to find the previous, we have to loop
-                while (pPrev && pPrev->Next() != m_pTail)
+                while (pPrev && (pPrev->Next() != m_pTail))
                     pPrev = pPrev->Next();
                 if (pPrev)
                 {
@@ -480,40 +480,6 @@ namespace NaM
 }  // end namespace NaM
 
 //------------------------------------------------------------------------
-#if 0
-class TestRunCerr
-{
-private:
-    static std::uint64_t ms_runId;
-    std::uint64_t m_runId;
-    std::string m_name;
-public:
-    TestRunCerr() = delete;
-    TestRunCerr(const TestRunCerr&) = delete;
-    TestRunCerr(TestRunCerr&&) = delete;
-
-    TestRunCerr(const std::string& name) : m_runId(++ms_runId), m_name(name)
-    {
-        std::cerr << std::endl << DASHES << std::endl;
-        std::cerr << ">>> Start run " << RunId() << ": " << Name() << " >>>" << std::endl;
-        std::cerr << DASHES << std::endl;
-    }
-    ~TestRunCerr()
-    {
-        std::cerr << "<<< End run " << RunId() << ": " << Name() << " <<<" << std::endl << std::endl;
-        m_name.clear();
-        m_runId = std::uint64_t(0);
-    }
-
-    [[nodiscard]] inline const std::uint64_t RunId() const { return m_runId; }
-    [[nodiscard]] inline const std::string& Name() const { return m_name; }
-
-    TestRunCerr& operator=(const TestRunCerr&) = delete;
-    TestRunCerr& operator=(TestRunCerr&) = delete;
-};
-std::uint64_t TestRunCerr::ms_runId = 0;
-#endif
-
 void TestSLLNodes()
 {
     TestRunCerr nodesRun("NODES");
