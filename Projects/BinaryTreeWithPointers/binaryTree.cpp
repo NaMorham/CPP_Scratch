@@ -70,6 +70,9 @@ namespace NaM
 
             ~BinaryTreeWPNode();
 
+            BinaryTreeWPNode<T, FnLE>* Add(const T& data);
+            inline BinaryTreeWPNode<T, FnLE>* operator+=(const T& data) { return Add(data); }
+
         public:
             [[nodiscard]] inline const T& Data() const { return m_data; }
             [[nodiscard]] inline T& Data() { return m_data; }
@@ -104,6 +107,14 @@ namespace NaM
         public:
             BinaryTreeWP()
                 : Identifiable<BinaryTreeWP<T, FnLE>>("BinaryTreeWP"), m_depth{ 0 }, m_pRoot{ nullptr } {}
+
+            [[nodiscard]] inline const size_t Depth() const { return m_depth; }
+
+            [[nodiscard]] inline const BinaryTreeWPNode_p<T, FnLE> Root() const { return m_pRoot;  }
+            [[nodiscard]] inline BinaryTreeWPNode_p<T, FnLE> Root() { return m_pRoot; }
+
+            BinaryTreeWP<T, FnLE>& Add(const T& data);
+            inline BinaryTreeWP<T, FnLE>& operator+=(const T& data) { return Add(data); }
         };
 
     }  // end namespace CppScratch
@@ -139,7 +150,19 @@ std::ostream& operator<<(std::ostream& oss, const Int32Node_p pNode)
     return oss;
 }
 
+std::ostream& operator<<(std::ostream& oss, const Int32BTree& tree)
+{
+    oss << "Id: " << tree.Id() << ", Depth: " << tree.Depth()
+        << ", &RootNode = " << PtrString(tree.Root());
+    if (tree.Root())
+    {
+        oss << std::endl << tree.Root();
+    }
+    return oss;
+}
+
 void TestNode();
+void TestBTreeWP();
 
 int main(int argc, char *argv[])
 {
@@ -147,6 +170,7 @@ int main(int argc, char *argv[])
         << " Version " << BinaryTreeWithPointers_VersionFull << std::endl << std::endl;
 
     TestNode();
+    TestBTreeWP();
 
     return EXIT_SUCCESS;
 }
@@ -165,6 +189,56 @@ namespace NaM
         template<typename T, class FnLE>
         BinaryTreeWPNode<T, FnLE>& BinaryTreeWPNode<T, FnLE>::SetData(const T& newData)
         {
+            return *this;
+        }
+
+        template<typename T, class FnLE>
+        BinaryTreeWPNode<T, FnLE>* BinaryTreeWPNode<T, FnLE>::Add(const T& data)
+        {
+            if (compare_less_equal(data, Data()))
+            {
+                // new data is <= our data
+                if (m_pLeft)
+                {
+                    std::cerr << "TODO: Add to left child node" << std::endl;
+                    return m_pLeft->Add(data);
+                }
+                else
+                {
+                    m_pLeft = new BinaryTreeWPNode<T, FnLE>(data);
+                    return m_pLeft;
+                }
+            }
+            else
+            {
+                if (m_pRight)
+                {
+                    std::cerr << "TODO: Add to right child node" << std::endl;
+                    return m_pRight->Add(data);
+                }
+                else
+                {
+                    m_pRight = new BinaryTreeWPNode<T, FnLE>(data);
+                    return m_pRight;
+                }
+            }
+            return this;
+        }
+
+
+        template<typename T, class FnLE>
+        BinaryTreeWP<T, FnLE>& BinaryTreeWP<T, FnLE>::Add(const T& data)
+        {
+            if (m_pRoot)
+            {
+                //we have a root node, add to it
+                std::cerr << "TODO: Add to existing node" << std::endl;
+                BinaryTreeWPNode<T, FnLE>* root = m_pRoot->Add(data);
+            }
+            else
+            {
+                m_pRoot = new BinaryTreeWPNode<T, FnLE>(data);
+            }
             return *this;
         }
 
@@ -245,5 +319,46 @@ void TestNode()
         bool comp56{ *pNode5 <= *pNode6 }, comp65{ *pNode6 <= *pNode5 };
         std::cerr << "Expect comp56 to be true: comp56 = " << TrueOrFalse(comp56) << std::endl;
         std::cerr << "Expect comp65 to be false: comp65 = " << TrueOrFalse(comp65) << std::endl;
+    }
+}
+
+void TestBTreeWP()
+{
+    TestRunCerr suite("Test B-Tree with pointers");
+
+    {
+        TestRunCerr run("Construct");
+
+        Int32BTree tree1;
+        std::cerr << g_counter << "tree1: " << tree1 << std::endl;
+    }
+
+    {
+        TestRunCerr run("Add root data - Add(...)");
+
+        Int32BTree tree2;
+        std::cerr << g_counter << "tree2: " << tree2 << std::endl;
+        tree2.Add(15);
+        std::cerr << g_counter << "tree2: " << tree2 << std::endl;
+    }
+
+    {
+        TestRunCerr run("Add root data - += ...");
+
+        Int32BTree tree3;
+        std::cerr << g_counter << "tree3: " << tree3 << std::endl;
+        tree3 += 35;
+        std::cerr << g_counter << "tree3: " << tree3 << std::endl;
+    }
+
+    {
+        TestRunCerr run("Add root data +1 node - Add(...)");
+
+        Int32BTree tree4;
+        std::cerr << g_counter << "tree4: " << tree4 << std::endl;
+        tree4.Add(50);
+        std::cerr << g_counter << "tree4: " << tree4 << std::endl;
+        tree4.Add(40);
+        std::cerr << g_counter << "tree4: " << tree4 << std::endl;
     }
 }
