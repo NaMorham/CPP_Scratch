@@ -61,8 +61,9 @@ namespace NaM
             FnLE compare_less_equal;
 
         protected:
-            BinaryTreeWPNode(const T& data)
-                : Identifiable<BinaryTreeWPNode<T, FnLE>>("BinaryTreeWPNode"), m_data(data), m_depth{ 0 },
+            BinaryTreeWPNode(const T& data, const size_t depth = 0)
+                : Identifiable<BinaryTreeWPNode<T, FnLE>>("BinaryTreeWPNode"),
+                m_data(data), m_depth{ depth },
                 m_pParent{ nullptr }, m_pLeft{ nullptr }, m_pRight{ nullptr } {}
 
             BinaryTreeWPNode(const BinaryTreeWPNode<T, FnLE>&) = delete;
@@ -70,8 +71,8 @@ namespace NaM
 
             ~BinaryTreeWPNode();
 
-            BinaryTreeWPNode<T, FnLE>* Add(const T& data);
-            inline BinaryTreeWPNode<T, FnLE>* operator+=(const T& data) { return Add(data); }
+            BinaryTreeWPNode<T, FnLE>* Add(const T& data, const size_t depth);
+            inline BinaryTreeWPNode<T, FnLE>* operator+=(const T& data) { return Add(data, m_depth+1); }
 
         public:
             [[nodiscard]] inline const T& Data() const { return m_data; }
@@ -107,6 +108,9 @@ namespace NaM
         public:
             BinaryTreeWP()
                 : Identifiable<BinaryTreeWP<T, FnLE>>("BinaryTreeWP"), m_depth{ 0 }, m_pRoot{ nullptr } {}
+            BinaryTreeWP(const BinaryTreeWP&) = delete;
+            BinaryTreeWP(BinaryTreeWP&&) = delete;
+            virtual ~BinaryTreeWP();
 
             [[nodiscard]] inline const size_t Depth() const { return m_depth; }
 
@@ -146,6 +150,15 @@ std::ostream& operator<<(std::ostream& oss, const Int32Node_p pNode)
             << ", Parent: " << PtrString(pNode->Parent()) << ", Data: "
             << pNode->Data() << ", Left: " << PtrString(pNode->Left())
             << ", Right: " << PtrString(pNode->Right());
+        std::string indent(pNode->Depth(), ' ');
+        if (pNode->Left())
+        {
+            oss << std::endl << indent << "Left: " << pNode->Left();
+        }
+        if (pNode->Right())
+        {
+            oss << std::endl << indent << "Right: " << pNode->Right();
+        }
     }
     return oss;
 }
@@ -183,7 +196,16 @@ namespace NaM
         template<typename T, class FnLE>
         BinaryTreeWPNode<T, FnLE>::~BinaryTreeWPNode()
         {
-            std::cerr << "TODO: BinaryTreeWPNode desctructor" << std::endl;
+            if (m_pLeft)
+            {
+                delete m_pLeft;
+                m_pLeft = nullptr;
+            }
+            if (m_pRight)
+            {
+                delete m_pRight;
+                m_pRight = nullptr;
+            }
         }
 
         template<typename T, class FnLE>
@@ -193,7 +215,7 @@ namespace NaM
         }
 
         template<typename T, class FnLE>
-        BinaryTreeWPNode<T, FnLE>* BinaryTreeWPNode<T, FnLE>::Add(const T& data)
+        BinaryTreeWPNode<T, FnLE>* BinaryTreeWPNode<T, FnLE>::Add(const T& data, const size_t depth)
         {
             if (compare_less_equal(data, Data()))
             {
@@ -201,11 +223,19 @@ namespace NaM
                 if (m_pLeft)
                 {
                     std::cerr << "TODO: Add to left child node" << std::endl;
-                    return m_pLeft->Add(data);
+                    return m_pLeft->Add(data, m_depth+1);
                 }
                 else
                 {
-                    m_pLeft = new BinaryTreeWPNode<T, FnLE>(data);
+                    m_pLeft = new BinaryTreeWPNode<T, FnLE>(data, m_depth+1);
+                    if (m_pLeft)
+                    {
+                        m_pLeft->m_pParent = this;
+                    }
+                    else
+                    {
+                        std::cerr << "ERROR: Could not allocate Node" << std::endl;
+                    }
                     return m_pLeft;
                 }
             }
@@ -214,11 +244,19 @@ namespace NaM
                 if (m_pRight)
                 {
                     std::cerr << "TODO: Add to right child node" << std::endl;
-                    return m_pRight->Add(data);
+                    return m_pRight->Add(data, m_depth+1);
                 }
                 else
                 {
-                    m_pRight = new BinaryTreeWPNode<T, FnLE>(data);
+                    m_pRight = new BinaryTreeWPNode<T, FnLE>(data, m_depth+1);
+                    if (m_pRight)
+                    {
+                        m_pRight->m_pParent = this;
+                    }
+                    else
+                    {
+                        std::cerr << "ERROR: Could not allocate Node" << std::endl;
+                    }
                     return m_pRight;
                 }
             }
@@ -227,17 +265,32 @@ namespace NaM
 
 
         template<typename T, class FnLE>
+        BinaryTreeWP<T, FnLE>::~BinaryTreeWP()
+        {
+            m_depth = 0;
+            if (m_pRoot)
+            {
+                delete m_pRoot;
+                m_pRoot = nullptr;
+            }
+        }
+
+        template<typename T, class FnLE>
         BinaryTreeWP<T, FnLE>& BinaryTreeWP<T, FnLE>::Add(const T& data)
         {
             if (m_pRoot)
             {
                 //we have a root node, add to it
-                std::cerr << "TODO: Add to existing node" << std::endl;
-                BinaryTreeWPNode<T, FnLE>* root = m_pRoot->Add(data);
+                BinaryTreeWPNode<T, FnLE>* pNewNode = m_pRoot->Add(data, 1);
+                if (pNewNode)
+                {
+                    ++m_depth;
+                }
             }
             else
             {
                 m_pRoot = new BinaryTreeWPNode<T, FnLE>(data);
+                m_depth = 1;
             }
             return *this;
         }
@@ -360,5 +413,25 @@ void TestBTreeWP()
         std::cerr << g_counter << "tree4: " << tree4 << std::endl;
         tree4.Add(40);
         std::cerr << g_counter << "tree4: " << tree4 << std::endl;
+    }
+
+    {
+        TestRunCerr run("Add multiple nodes - Add(...)");
+
+        Int32BTree tree5;
+        std::cerr << g_counter << "tree5: " << tree5 << std::endl;
+        std::cerr << std::endl;
+
+        tree5.Add(25);
+        std::cerr << g_counter << "tree5: " << tree5 << std::endl;
+        std::cerr << std::endl;
+
+        tree5.Add(23).Add(21).Add(19);  // all left nodes
+        std::cerr << g_counter << "tree5: " << tree5 << std::endl;
+        std::cerr << std::endl;
+
+        tree5.Add(50).Add(22);
+        std::cerr << g_counter << "tree5: " << tree5 << std::endl;
+        std::cerr << std::endl;
     }
 }
