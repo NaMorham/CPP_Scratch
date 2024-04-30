@@ -31,15 +31,15 @@ namespace NaM
         {
         public:
             TEST_BinaryTreeWPNode() = default;
-            TEST_BinaryTreeWPNode(const TEST_BinaryTreeWPNode&) = delete;
-            TEST_BinaryTreeWPNode(TEST_BinaryTreeWPNode&) = delete;
+            TEST_BinaryTreeWPNode(const TEST_BinaryTreeWPNode<T, FnLE>&) = delete;
+            TEST_BinaryTreeWPNode(TEST_BinaryTreeWPNode<T, FnLE>&) = delete;
             ~TEST_BinaryTreeWPNode() = default;
 
-            BinaryTreeWPNode_p<T, FnLE> CreateNode(const T& data)
+            BinaryTreeWPNode<T, FnLE>* CreateNode(const T& data)
             {
-                return new BinaryTreeWPNode(data);
+                return new BinaryTreeWPNode<T, FnLE>(data);
             }
-            void DeleteNode(BinaryTreeWPNode_p<T, FnLE>& pNode)
+            void DeleteNode(BinaryTreeWPNode<T, FnLE>*& pNode)
             {
                 delete pNode;
                 pNode = nullptr;
@@ -62,11 +62,11 @@ namespace NaM
 
         protected:
             BinaryTreeWPNode(const T& data)
-                : Identifiable<BinaryTreeWPNode>("BinaryTreeWPNode"), m_data(data), m_depth{ 0 },
+                : Identifiable<BinaryTreeWPNode<T, FnLE>>("BinaryTreeWPNode"), m_data(data), m_depth{ 0 },
                 m_pParent{ nullptr }, m_pLeft{ nullptr }, m_pRight{ nullptr } {}
 
-            BinaryTreeWPNode(const BinaryTreeWPNode&) = delete;
-            BinaryTreeWPNode(BinaryTreeWPNode&&) = delete;
+            BinaryTreeWPNode(const BinaryTreeWPNode<T, FnLE>&) = delete;
+            BinaryTreeWPNode(BinaryTreeWPNode<T, FnLE>&&) = delete;
 
             ~BinaryTreeWPNode();
 
@@ -103,7 +103,7 @@ namespace NaM
 
         public:
             BinaryTreeWP()
-                : Identifiable<BinaryTreeWP>("BinaryTreeWP"), m_depth{ 0 }, m_pRoot{ nullptr } {}
+                : Identifiable<BinaryTreeWP<T, FnLE>>("BinaryTreeWP"), m_depth{ 0 }, m_pRoot{ nullptr } {}
         };
 
     }  // end namespace CppScratch
@@ -176,17 +176,12 @@ namespace NaM
 struct LEPred
 {
 public:
-    bool operator()(std::int32_t a, std::int32_t b)
+    bool operator()(const std::int32_t a, const std::int32_t b)
     {
         std::cerr << "a = " << a << ", b = " << b << std::endl;
         return a <= b;
     }
 };
-bool LETest(std::int32_t a, int32_t b)
-{
-    std::cerr << "a = " << a << ", b = " << b << std::endl;
-    return a <= b;
-}
 
 void TestNode()
 {
@@ -212,13 +207,8 @@ void TestNode()
     {
         TestRunCerr suite("Test B-Tree Node (default comparator)");
 
-        //*
-        NaM::CppScratch::TEST_BinaryTreeWPNode<std::int32_t> test2;
-        NaM::CppScratch::BinaryTreeWPNode_p<std::int32_t> pNode3, pNode4;
-        /*/
         NaM::CppScratch::TEST_BinaryTreeWPNode<std::int32_t, LEPred> test2;
         NaM::CppScratch::BinaryTreeWPNode_p<std::int32_t, LEPred> pNode3, pNode4;
-        //*/
 
         pNode3 = test2.CreateNode(13);
         std::cerr << g_counter << pNode3 << std::endl;
@@ -231,5 +221,29 @@ void TestNode()
     }
 
     {
+        TestRunCerr suite("Test B-Tree Node (default comparator)");
+
+        class LEPredBad
+        {
+        public:
+            bool operator()(const std::int32_t a, const std::int32_t b)
+            {
+                std::cerr << "This is a bad predicate (a = " << a << ", b = " << b << ")" << std::endl;
+                return a > b;
+            }
+        };
+
+        NaM::CppScratch::TEST_BinaryTreeWPNode<std::int32_t, LEPredBad> test3;
+        NaM::CppScratch::BinaryTreeWPNode_p<std::int32_t, LEPredBad> pNode5, pNode6;
+
+        pNode5 = test3.CreateNode(10);
+        std::cerr << g_counter << pNode5 << std::endl;
+        pNode6 = test3.CreateNode(9);
+        std::cerr << g_counter << pNode6 << std::endl;
+
+        // LEPredBad is ass backwards and does a > b comparison
+        bool comp56{ *pNode5 <= *pNode6 }, comp65{ *pNode6 <= *pNode5 };
+        std::cerr << "Expect comp56 to be true: comp56 = " << TrueOrFalse(comp56) << std::endl;
+        std::cerr << "Expect comp65 to be false: comp65 = " << TrueOrFalse(comp65) << std::endl;
     }
 }
