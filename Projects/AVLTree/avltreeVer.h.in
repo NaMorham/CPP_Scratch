@@ -1,0 +1,10 @@
+#pragma once
+
+#define AVLTree_Version_Major @AVLTree_VERSION_MAJOR@
+#define AVLTree_Version_Minor @AVLTree_VERSION_MINOR@
+#define AVLTree_Version_Patch @AVLTree_VERSION_PATCH@
+#define AVLTree_Version_Tweak @AVLTree_VERSION_TWEAK@
+
+#define AVLTree_VersionShort "@AVLTree_VERSION_MAJOR@.@AVLTree_VERSION_MINOR@"
+#define AVLTree_VersionLong AVLTree_VersionShort".@AVLTree_VERSION_PATCH@"
+#define AVLTree_VersionFull AVLTree_VersionLong".@AVLTree_VERSION_TWEAK@"
