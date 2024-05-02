@@ -1,0 +1,10 @@
+#pragma once
+
+#define TestUtilsTests_Version_Major @TestUtilsTests_VERSION_MAJOR@
+#define TestUtilsTests_Version_Minor @TestUtilsTests_VERSION_MINOR@
+#define TestUtilsTests_Version_Patch @TestUtilsTests_VERSION_PATCH@
+#define TestUtilsTests_Version_Tweak @TestUtilsTests_VERSION_TWEAK@
+
+#define TestUtilsTests_VersionShort "@TestUtilsTests_VERSION_MAJOR@.@TestUtilsTests_VERSION_MINOR@"
+#define TestUtilsTests_VersionLong TestUtilsTests_VersionShort".@TestUtilsTests_VERSION_PATCH@"
+#define TestUtilsTests_VersionFull TestUtilsTests_VersionLong".@TestUtilsTests_VERSION_TWEAK@"
