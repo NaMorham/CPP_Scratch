@@ -143,11 +143,6 @@ namespace NaM
             BinaryTreeWPNode<T, FnLE, FnE>* m_pRoot;
 
         protected:
-            BinaryTreeWP<T, FnLE, FnE>&
-                Delete(BinaryTreeWPNode_p<T, FnLE, FnE> pNode,
-                    BinaryTreeWPNode_p<T, FnLE, FnE>& pLeft,
-                    BinaryTreeWPNode_p<T, FnLE, FnE>& pRight);
-
             // Prune from the node that matches and pass out the node and it's leaves.  The caller
             // is now resposible for cleaning up the memory with delete.
             BinaryTreeWP<T, FnLE, FnE>&
@@ -229,6 +224,24 @@ std::ostream& operator<<(std::ostream& oss, const Int32BTree& tree)
     {
         oss << std::endl << tree.Root();
     }
+    return oss;
+}
+
+std::ostream& operator<<(std::ostream& oss, const std::list<int32_t>& values)
+{
+    size_t count{ 0 }, numValues{ values.size() };
+    std::cerr << g_counter << "Values (" << numValues << ") -> [";
+
+    for (int32_t v : values)
+    {
+        if (count++)
+        {
+            oss << ", ";
+        }
+        oss << v;
+    }
+    oss << "]";
+
     return oss;
 }
 
@@ -488,6 +501,7 @@ namespace NaM
         BinaryTreeWP<T, FnLE, FnE>& BinaryTreeWP<T, FnLE, FnE>::Delete(const T& data)
         {
             BinaryTreeWPNode_p<T, FnLE, FnE> pNode;
+#if 0
             this->Prune(data, pNode);
             if (pNode)
             {
@@ -502,23 +516,93 @@ namespace NaM
                  *    pLeft      pRight
                  */
                 BinaryTreeWPNode_p<T, FnLE, FnE> pLeft, pRight, pParent;
-                pLeft = pNode->Left();
-                pRight = pNode->Right();
-                pParent = pNode->Parent();
+                pLeft = pNode->m_pLeft;
+                pRight = pNode->m_pRight;
+                pParent = pNode->m_pParent;
+                pNode->m_pParent = nullptr;
+                if (pParent)
+                {
+                    if (pParent->Left() == pNode)
+                        pParent->m_pLeft = nullptr; // we were the left, so break the chain
+                    else if (pParent->Right() == pNode)
+                        pParent->m_pRight = nullptr;
+                }
+                std::list<T> vals;
+                if (pLeft)
+                {
+                    pLeft->Values(vals);
+                }
+                if (pRight)
+                {
+                    pRight->Values(vals);
+                }
+                for (T v : vals)
+                {
+                    if (pParent)
+                    {
+                        pParent->Add(v, pParent->Depth() + 1);
+                    }
+                    else
+                    {
+                        pParent = new BinaryTreeWPNode<T, FnLE, FnE>(v);
+                    }
+                }
             }
+#else
+            pNode = this->Find(data);
+            if (pNode)
+            {
+                // we found the node to delete
+                BinaryTreeWPNode_p<T, FnLE, FnE> pLeft, pRight, pParent;
+                std::list<T> values;
+                pLeft = pNode->m_pLeft;
+                pRight = pNode->m_pRight;
+                pParent = pNode->m_pParent;
+                if (pLeft)
+                {
+                    pLeft->Values(values);
+                }
+                if (pRight)
+                {
+                    pRight->Values(values);
+                }
+                // we now have the child values of the node to remove
+                pNode->m_pParent = nullptr;
+                // the node to delete is now removed from the tree
+
+                if (pNode == m_pRoot)
+                {
+                    // we are removing the root node
+                    m_pRoot = nullptr;
+                }
+                else
+                {
+                    // not the root node, so we also have a parent to deal with
+                    if (pParent->m_pLeft == pNode)
+                    {
+                        // pNode was the left node
+                        pParent->m_pLeft = nullptr;
+                    }
+                    else if (pParent->m_pRight == pNode)
+                    {
+                        // pNode was the right node
+                        pParent->m_pRight = nullptr;
+                    }
+                }
+                // at this point we have the values, AND we have detached
+                // the node from a parent, so we can clean up
+                delete pNode;
+                pNode = nullptr;
+
+                for (T v : values)
+                {
+                    this->Add(v);
+                }
+            }
+#endif
             return *this;
         }
 
-
-        template<typename T, class FnLE, class FnE>
-        BinaryTreeWP<T, FnLE, FnE>&
-            BinaryTreeWP<T, FnLE, FnE>::Delete(
-                BinaryTreeWPNode_p<T, FnLE, FnE> pNode,
-                BinaryTreeWPNode_p<T, FnLE, FnE>& pLeft,
-                BinaryTreeWPNode_p<T, FnLE, FnE>& pRight)
-        {
-            return *this;
-        }
     }  // end namespace CppScratch
 
 }  // end namespace NaM
@@ -704,50 +788,72 @@ void TestBTreeWP()
     }
 
     {
-        TestRunCerr run("Prune node and children - Prune(...)");
+        TestRunCerr run("Values of node - Node.Values(...)");
 
-        Int32Node_TEST treeTest7;
         Int32BTree tree7;
-        Int32Node_p pRemoved;
+        std::list<int32_t> values;
 
         tree7.Add(100);
         tree7.Add(50).Add(150);
         tree7.Add(25).Add(75).Add(125).Add(175);
         std::cerr << g_counter << "tree7: " << tree7 << std::endl;
+        tree7.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
+
+        values.clear();
+        tree7.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
+    }
+
+    {
+        TestRunCerr run("Prune node and children - Prune(...)");
+
+        Int32Node_TEST treeTest8;
+        Int32BTree tree8;
+        Int32Node_p pRemoved;
+        std::list<int32_t> values;
+
+        tree8.Add(100);
+        tree8.Add(50).Add(150);
+        tree8.Add(25).Add(75).Add(125).Add(175);
+        std::cerr << g_counter << "tree8: " << tree8 << std::endl;
+        tree8.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
 
         std::cerr << std::endl
             << "Use the test wrangler to prune the node and return the result" << std::endl;
         // prune the left tree
-        treeTest7.PruneTreeNode(tree7, 50, pRemoved);
+        treeTest8.PruneTreeNode(tree8, 50, pRemoved);
         std::cerr << "  Prune(50, out) = " << PtrString(pRemoved) << std::endl;
-        std::cerr << g_counter << "tree7: " << tree7 << std::endl << std::endl;
+        std::cerr << g_counter << "tree8: " << tree8 << std::endl << std::endl;
         std::cerr << g_counter << "  out: " << pRemoved << std::endl;
+
+        values.clear();
+        tree8.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
 
         delete pRemoved;
         pRemoved = nullptr;
     }
 
     {
-        TestRunCerr run("Values of node - Node.Values(...)");
+        TestRunCerr run("Delete a  node - Delete(...)");
 
-        Int32BTree tree8;
-        tree8.Add(100);
-        tree8.Add(50).Add(150);
-        tree8.Add(25).Add(75).Add(125).Add(175);
-        std::cerr << g_counter << "tree8: " << tree8 << std::endl;
-
+        Int32BTree tree9;
         std::list<int32_t> values;
-        size_t count{ 0 }, numValues{ tree8.Root()->Values(values).size() };
-        std::cerr << g_counter << "Values (" << numValues << ") -> [";
 
-        for (int32_t v : values)
-        {
-            if (count++)
-            {
-                std::cerr << ", ";
-            }
-            std::cerr << v;
-        }
-        std::cerr << "]" << std::endl;
+        tree9.Add(100);
+        tree9.Add(50).Add(150);
+        tree9.Add(25).Add(75).Add(125).Add(175);
+        tree9.Add(155).Add(120);
+        std::cerr << g_counter << "tree9: " << tree9 << std::endl;
+        tree9.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
+
+        tree9.Delete(150);
+
+        values.clear();
+        tree9.Root()->Values(values);
+        std::cerr << g_counter << values << std::endl;
     }
 }
