@@ -124,6 +124,40 @@ namespace NaM
         }
 
         //------------------------------------------------------------------------
+        namespace Path
+        {
+            /**
+             * Get the file part of a passed in path
+             */
+            std::string BaseName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                size_t pos;
+                pos = path.find_last_of(sep);
+                return std::string { pos == std::string::npos ? path : path.substr(pos+1) };
+            }
+
+            /**
+             * Get the folder part of a passed in path
+             */
+            std::string DirName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                size_t pos;
+                pos = path.find_last_of(sep);
+                return std::string { pos == std::string::npos ? path : path.substr(0, pos) };
+            }
+
+            /**
+             * Get the name of a file without the extension
+             *
+             * NOTE: For now this is lazy and assumes the first '.' is the beginning of the extension
+             */
+            std::string FileShortName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                return FirstToken(BaseName(path, sep), ".");
+            }
+        };
+
+        //------------------------------------------------------------------------
         class _CounterVal
         {
         private:
