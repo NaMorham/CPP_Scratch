@@ -21,19 +21,26 @@ using NaM::CppScratch::TextNumLength;
 using NaM::CppScratch::XofYStr;
 using NaM::CppScratch::Path::FileShortName;
 
-[[nodiscard]] bool TestTrueOrFalse();
-[[nodiscard]] bool TestXofYStr();
-[[nodiscard]] bool TestPtrString();
-[[nodiscard]] bool TestTextNumLength();
-[[nodiscard]] bool TestFirstToken();
-[[nodiscard]] bool TestLastToken();
-[[nodiscard]] bool TestSplitLastToken();
-[[nodiscard]] bool TestSplitFirstToken();
-[[nodiscard]] bool TestPath_BaseName();
-[[nodiscard]] bool TestPath_DirName();
-[[nodiscard]] bool TestPath_FileShortName();
-[[nodiscard]] bool TestPath_AppendDelimiter();
-[[nodiscard]] bool TestPath_StripDelimiter();
+struct TestGroupResult
+{
+    size_t numPassed{ 0 }, numTests{ 0 };
+    [[nodiscard]] inline bool Passed() const { return (numPassed == numTests); }
+    inline TestGroupResult& operator&=(const bool result) { if (result) ++numPassed; return *this; }
+};
+
+[[nodiscard]] TestGroupResult TestTrueOrFalse();
+[[nodiscard]] TestGroupResult TestXofYStr();
+[[nodiscard]] TestGroupResult TestPtrString();
+[[nodiscard]] TestGroupResult TestTextNumLength();
+[[nodiscard]] TestGroupResult TestFirstToken();
+[[nodiscard]] TestGroupResult TestLastToken();
+[[nodiscard]] TestGroupResult TestSplitLastToken();
+[[nodiscard]] TestGroupResult TestSplitFirstToken();
+[[nodiscard]] TestGroupResult TestPath_BaseName();
+[[nodiscard]] TestGroupResult TestPath_DirName();
+[[nodiscard]] TestGroupResult TestPath_FileShortName();
+[[nodiscard]] TestGroupResult TestPath_AppendDelimiter();
+[[nodiscard]] TestGroupResult TestPath_StripDelimiter();
 
 //-----------------------------------------------------------------------------
 using NaM::CppScratch::TestRunCerr;
@@ -77,11 +84,12 @@ std::string TestNumLabel(size_t x, size_t y)
     return ss.str();
 }
 
-bool TestTrueOrFalse()
+TestGroupResult TestTrueOrFalse()
 {
     TestRunCerr run("Test bool to string : TrueOrFalse(...)");
     std::string got;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult{ 0, 2 };
 
     got.assign(TrueOrFalse(true));
     result = (got.compare("true") == 0);
@@ -98,15 +106,16 @@ bool TestTrueOrFalse()
     return runResult;
 }
 
-bool TestTextNumLength()
+TestGroupResult TestTextNumLength()
 {
     TestRunCerr run("Get text length of number");
 
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
     return runResult;
 }
 
-bool TestXofYStr()
+TestGroupResult TestXofYStr()
 {
     TestRunCerr run("Get text X of Y");
 
@@ -119,7 +128,8 @@ bool TestXofYStr()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
     std::string got;
 
     tests.push_back({ "zeros", 0, 0, "0/0", ""});
@@ -155,7 +165,7 @@ bool TestXofYStr()
     return runResult;
 }
 
-bool TestPtrString()
+TestGroupResult TestPtrString()
 {
     TestRunCerr run("Pointer to string");
 
@@ -166,7 +176,8 @@ bool TestPtrString()
         std::string expected;
     };
 
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
     std::list<TestVal> tests;
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
 
@@ -189,7 +200,7 @@ bool TestPtrString()
     return runResult;
 }
 
-bool TestFirstToken()
+TestGroupResult TestFirstToken()
 {
     using NaM::CppScratch::FirstToken;
     TestRunCerr run("Return first token");
@@ -203,7 +214,8 @@ bool TestFirstToken()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     tests.push_back({ "Empty string","","",nullptr });
     tests.push_back({ "Empty string with ws separator","","", &wsSeparators });
@@ -233,7 +245,7 @@ bool TestFirstToken()
     return runResult;
 }
 
-bool TestLastToken()
+TestGroupResult TestLastToken()
 {
     using NaM::CppScratch::LastToken;
     TestRunCerr run("Get last token from a string");
@@ -244,7 +256,8 @@ bool TestLastToken()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -262,7 +275,7 @@ bool TestLastToken()
     return runResult;
 }
 
-bool TestSplitFirstToken()
+TestGroupResult TestSplitFirstToken()
 {
     using NaM::CppScratch::SplitFirstToken;
     TestRunCerr run("Split a string on the first token");
@@ -273,7 +286,8 @@ bool TestSplitFirstToken()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -291,7 +305,7 @@ bool TestSplitFirstToken()
     return runResult;
 }
 
-bool TestSplitLastToken()
+TestGroupResult TestSplitLastToken()
 {
     using NaM::CppScratch::SplitLastToken;
     TestRunCerr run("Split a string on the last token");
@@ -302,7 +316,8 @@ bool TestSplitLastToken()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -320,7 +335,7 @@ bool TestSplitLastToken()
     return runResult;
 }
 
-bool TestPath_BaseName()
+TestGroupResult TestPath_BaseName()
 {
     using NaM::CppScratch::Path::BaseName;
     TestRunCerr run("Get the basename from a path (filename + extension)");
@@ -331,7 +346,8 @@ bool TestPath_BaseName()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -349,7 +365,7 @@ bool TestPath_BaseName()
     return runResult;
 }
 
-bool TestPath_DirName()
+TestGroupResult TestPath_DirName()
 {
     using NaM::CppScratch::Path::DirName;
     TestRunCerr run("Get the dirname from a path (directory/folder name)");
@@ -360,7 +376,8 @@ bool TestPath_DirName()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -378,7 +395,7 @@ bool TestPath_DirName()
     return runResult;
 }
 
-bool TestPath_FileShortName()
+TestGroupResult TestPath_FileShortName()
 {
     TestRunCerr run("Get the filenamename from a path (filename - extension)");
 
@@ -388,7 +405,8 @@ bool TestPath_FileShortName()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -406,7 +424,7 @@ bool TestPath_FileShortName()
     return runResult;
 }
 
-bool TestPath_AppendDelimiter()
+TestGroupResult TestPath_AppendDelimiter()
 {
     TestRunCerr run("Append a path delimiter to the end of a string");
 
@@ -416,7 +434,8 @@ bool TestPath_AppendDelimiter()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
@@ -434,7 +453,7 @@ bool TestPath_AppendDelimiter()
     return runResult;
 }
 
-bool TestPath_StripDelimiter()
+TestGroupResult TestPath_StripDelimiter()
 {
     TestRunCerr run("Remove a path delimiter from the end of a string");
 
@@ -444,7 +463,8 @@ bool TestPath_StripDelimiter()
     };
 
     std::list<TestVal> tests;
-    bool result, runResult{ true };
+    bool result;
+    TestGroupResult runResult;
 
     size_t passCount{ 0 }, failCount{ 0 }, testNum{ 1 };
     for (TestVal& test : tests)
