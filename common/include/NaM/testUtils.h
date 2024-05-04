@@ -112,8 +112,10 @@ namespace NaM
         template<typename T> // how do I limit this to a integer type?
         const size_t TextNumLength(const T& num)
         {
-            static const double log10Val{ std::log(10) };
-            return static_cast<size_t>(std::floor(std::log(num) / log10Val + 1));
+            return (
+                    num == 0 ?
+                    1 : 
+                    static_cast<size_t>(std::floor(std::log10(std::abs(static_cast<double>(num)))) + (num < 0 ? 2 : 1)));
         }
 
         constexpr const char* const _defaultXofYSep{ "/" };
