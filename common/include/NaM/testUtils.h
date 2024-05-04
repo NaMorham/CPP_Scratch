@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstdint>
+#include <cmath>
 
 namespace NaM
 {
@@ -105,6 +106,41 @@ namespace NaM
             }
         }
 
+        /**
+         * Calculate the number of chars needed to display a number
+         */
+        template<typename T> // how do I limit this to a integer type?
+        const size_t TextNumLength(const T& num)
+        {
+            static const double log10Val{ std::log(10) };
+            return static_cast<size_t>(std::floor(std::log(num) / log10Val + 1));
+        }
+
+        constexpr const char* const _defaultXofYSep{ "/" };
+
+        template <typename T>
+        std::string XofYStr(const T& x, const T& y, const std::string& sep = _defaultXofYSep)
+        {
+            // first, don't be stupid
+            if (x > y)
+            {
+                return XofYStr(y, x);
+            }
+            else
+            {
+                std::stringstream ss;
+                size_t w{ TextNumLength(y) };
+                ss << std::setw(w) << x << sep << std::setw(w) << y;
+                return ss.str();
+            }
+        }
+
+        template <typename T>
+        inline std::string XofYStr(const T& x, const T& y, const char& sep)
+        {
+            return XofYStr<T>(x, y, std::string(sep));
+        }
+
         template<typename T>
         const std::string PtrString(const T* ptr)
         {
@@ -154,6 +190,38 @@ namespace NaM
             std::string FileShortName(const std::string& path, const std::string& sep = pathSeparators)
             {
                 return FirstToken(BaseName(path, sep), ".");
+            }
+
+            /**
+             * Conditionally append a delimiter to the end of a string
+             */
+            std::string AppendDelimiter(const std::string& path, const char delimiter)
+            {
+                std::string s;
+                if (delimiter)
+                {
+                    if (s.back() != delimiter)
+                    {
+                        s.push_back(delimiter);
+                    }
+                }
+                return s;
+            }
+
+            /**
+             * Conditionally remove a delimiter from the end of a string
+             */
+            std::string StripDelimiter(const std::string& path, const char delimiter)
+            {
+                std::string s;
+                if (delimiter)
+                {
+                    if (s.back() == delimiter)
+                    {
+                        s.pop_back();
+                    }
+                }
+                return s;
             }
         };
 
