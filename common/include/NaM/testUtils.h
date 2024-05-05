@@ -195,13 +195,31 @@ namespace NaM
                 return FirstToken(BaseName(path, sep), ".");
             }
 
+            constexpr static const char defaultWinSep = '\\';
+            constexpr static const char defaultMacSep = ':';
+            constexpr static const char defaultPosixSep = '/';
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+            constexpr static const char defaultPathSep = defaultWinSep;
+#elif __APPLE__
+            constexpr static const char defaultPathSep = defaultMacSep;
+#elif __linux__
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#elif __unix__ // all unices not caught above
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#elif defined(_POSIX_VERSION)
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#else
+            // nfc what they have
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#endif
+
             /**
              * Conditionally append a delimiter to the end of a string
              */
-            std::string AppendDelimiter(const std::string& path, const char delimiter)
+            std::string AppendDelimiter(const std::string& path, const char delimiter = defaultPathSep)
             {
-                std::string s;
-                if (delimiter)
+                std::string s{ path };
+                if (delimiter && !path.empty())
                 {
                     if (s.back() != delimiter)
                     {
@@ -214,10 +232,10 @@ namespace NaM
             /**
              * Conditionally remove a delimiter from the end of a string
              */
-            std::string StripDelimiter(const std::string& path, const char delimiter)
+            std::string StripDelimiter(const std::string& path, const char delimiter = defaultPathSep)
             {
-                std::string s;
-                if (delimiter)
+                std::string s{ path };
+                if (delimiter && !path.empty())
                 {
                     if (s.back() == delimiter)
                     {
