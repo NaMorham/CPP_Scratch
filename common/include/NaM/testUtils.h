@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstdint>
+#include <cmath>
 
 namespace NaM
 {
@@ -76,6 +77,7 @@ namespace NaM
             }
             else if (lastpos == std::string::npos)
             {
+                remainder.clear();
                 return in;
             }
             else
@@ -95,6 +97,7 @@ namespace NaM
             }
             else if (firstpos == std::string::npos)
             {
+                remainder.clear();
                 return in;
             }
             else
@@ -103,6 +106,42 @@ namespace NaM
                 remainder.assign(in.substr(firstpos+1));
                 return outString;
             }
+        }
+
+        /**
+         * Calculate the number of chars needed to display a number
+         */
+        template<typename T> // how do I limit this to a integer type?
+        const size_t TextNumLength(const T& num)
+        {
+            return (num == 0 ?
+                    1 : 
+                    static_cast<size_t>(std::floor(std::log10(std::abs(static_cast<double>(num)))) + (num < 0 ? 2 : 1)));
+        }
+
+        constexpr const char* const _defaultXofYSep{ "/" };
+
+        template <typename T>
+        std::string XofYStr(const T& x, const T& y, const std::string& sep = _defaultXofYSep)
+        {
+            // first, don't be stupid
+            if (x > y)
+            {
+                return XofYStr(y, x);
+            }
+            else
+            {
+                std::stringstream ss;
+                size_t w{ TextNumLength(y) };
+                ss << std::setw(w) << x << sep << std::setw(w) << y;
+                return ss.str();
+            }
+        }
+
+        template <typename T>
+        inline std::string XofYStr(const T& x, const T& y, const char& sep)
+        {
+            return XofYStr<T>(x, y, std::string(sep));
         }
 
         template<typename T>
@@ -122,6 +161,90 @@ namespace NaM
             }
             return ss.str();
         }
+
+        //------------------------------------------------------------------------
+        namespace Path
+        {
+            /**
+             * Get the file part of a passed in path
+             */
+            std::string BaseName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                size_t pos;
+                pos = path.find_last_of(sep);
+                return std::string { pos == std::string::npos ? path : path.substr(pos+1) };
+            }
+
+            /**
+             * Get the folder part of a passed in path
+             */
+            std::string DirName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                size_t pos;
+                pos = path.find_last_of(sep);
+                return std::string { pos == std::string::npos ? path : path.substr(0, pos) };
+            }
+
+            /**
+             * Get the name of a file without the extension
+             *
+             * NOTE: For now this is lazy and assumes the first '.' is the beginning of the extension
+             */
+            std::string FileShortName(const std::string& path, const std::string& sep = pathSeparators)
+            {
+                return FirstToken(BaseName(path, sep), ".");
+            }
+
+            constexpr static const char defaultWinSep = '\\';
+            constexpr static const char defaultMacSep = ':';
+            constexpr static const char defaultPosixSep = '/';
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+            constexpr static const char defaultPathSep = defaultWinSep;
+#elif __APPLE__
+            constexpr static const char defaultPathSep = defaultMacSep;
+#elif __linux__
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#elif __unix__ // all unices not caught above
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#elif defined(_POSIX_VERSION)
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#else
+            // nfc what they have
+            constexpr static const char defaultPathSep = defaultPosixSep;
+#endif
+
+            /**
+             * Conditionally append a delimiter to the end of a string
+             */
+            std::string AppendDelimiter(const std::string& path, const char delimiter = defaultPathSep)
+            {
+                std::string s{ path };
+                if (delimiter && !path.empty())
+                {
+                    if (s.back() != delimiter)
+                    {
+                        s.push_back(delimiter);
+                    }
+                }
+                return s;
+            }
+
+            /**
+             * Conditionally remove a delimiter from the end of a string
+             */
+            std::string StripDelimiter(const std::string& path, const char delimiter = defaultPathSep)
+            {
+                std::string s{ path };
+                if (delimiter && !path.empty())
+                {
+                    if (s.back() == delimiter)
+                    {
+                        s.pop_back();
+                    }
+                }
+                return s;
+            }
+        };
 
         //------------------------------------------------------------------------
         class _CounterVal
