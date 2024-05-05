@@ -346,26 +346,47 @@ std::ostream& operator<<(std::ostream& oss, const TestGroupResult& res)
     return oss;
 }
 
+struct FuncColPrefix_t
+{
+    std::string prefix;
+    FuncColPrefix_t() {
+        if (prefix.empty())
+        {
+            std::stringstream ss;
+            ss << C_BLD << C_BLU;
+            prefix.assign(ss.str());
+        }
+    }
+    const std::string& operator()() { return prefix; }
+};
+static FuncColPrefix_t _FuncColPrefix;
+static const std::string FuncColPrefix{ _FuncColPrefix.prefix };
+static const std::string FuncColSuffix{ C_NRM };
+
 TestGroupResult TestTrueOrFalse()
 {
     TestRunCerr run("Test bool to string : TrueOrFalse(...)");
     std::string got;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult{ 0, 2 };
 
     got.assign(TrueOrFalse(true));
     result = (got.compare("true") == 0);
     runResult &= result;
-    std::cerr << g_counter << "Test [1/2]: TrueOrFalse(true) -> \"" << got
-        << "\" == " << PassFail(result) << std::endl;
+    std::cerr << g_counter << "Test [1/2]: "
+        << FuncColPrefix << "TrueOrFalse" << FuncColSuffix << "(true)"
+        << " -> \"" << got << "\" == "
+        << PassFail(result) << std::endl;
 
     got.assign(TrueOrFalse(false));
     result = (got.compare("false") == 0);
     runResult &= result;
-    std::cerr << g_counter << "Test [2/2]: TrueOrFalse(false) -> \"" << got
-        << "\" == " << PassFail(result) << std::endl;
+    std::cerr << g_counter << "Test [2/2]: "
+        << FuncColPrefix << "TrueOrFalse" << FuncColSuffix << "(false)"
+        << " -> \"" << got << "\" == "
+        << PassFail(result) << std::endl;
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -381,7 +402,7 @@ TestGroupResult TestTextNumLength()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     tests.push_back({ "Zero", 0, 1 });
@@ -415,7 +436,8 @@ TestGroupResult TestTextNumLength()
         resultVal = TextNumLength(test.inVal);
         result = (resultVal == test.expected);
         std::cerr << test.name << ": "
-            << std::endl << "\tTextNumLength(" << test.inVal << ") = "
+            << std::endl << "\t" << FuncColPrefix << "TextNumLength" << FuncColSuffix
+            << "(" << test.inVal << ") = "
             << resultVal << " -> " << PassFail(result);
         if (!result)
             std::cerr << ", expected \"" << test.expected << "\"";
@@ -423,7 +445,7 @@ TestGroupResult TestTextNumLength()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -440,7 +462,7 @@ TestGroupResult TestXofYStr()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
     std::string got;
 
@@ -470,7 +492,8 @@ TestGroupResult TestXofYStr()
         result = (test.expected.compare(got) == 0);
         std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
             << test.name << ": " << std::endl
-            << "\tXofYStr(" << test.x << ", " << test.y << ") = \"" << got << "\""
+            << "\t" << FuncColPrefix << "XofYStr" << FuncColSuffix
+            << "(" << test.x << ", " << test.y << ") = \"" << got << "\""
             << " -> " << PassFail(result);
         if (!result)
             std::cerr << ", expected \"" << test.expected << "\"";
@@ -479,7 +502,7 @@ TestGroupResult TestXofYStr()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -493,7 +516,7 @@ TestGroupResult TestPtrString()
         const void* const inPtr;
     };
 
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
     std::list<TestVal> tests;
     size_t testNum{ 1 };
@@ -520,20 +543,20 @@ TestGroupResult TestPtrString()
     tests.push_back({ "uint64_t", &ui64 });
 
     runResult.numTests = tests.size();
-    result = true;
     for (const TestVal& test : tests)
     {
         // there is no pass fail here since the different OS' seem to provide a different string
         // we could calculate for the architecture, but it seems like a hassle
         std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
             << ": " << test.name << ": "
-            << std::endl << "\tPtrString(...) = \"" << PtrString(test.inPtr) << "\""
+            << std::endl << "\t" << FuncColPrefix << "PtrString" << FuncColSuffix
+            << "(...) = \"" << PtrString(test.inPtr) << "\""
             << std::endl;
 
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -558,7 +581,7 @@ TestGroupResult TestFirstToken()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     std::string sepStr;
     TestGroupResult runResult;
     static const std::string single{"ALongStringWithNoBreak"};
@@ -597,9 +620,10 @@ TestGroupResult TestFirstToken()
     {
         std::string resultStr{test.seps ? FirstToken(test.inVal, test.separator) : FirstToken(test.inVal)};
         result = (test.expected.compare(resultStr) == 0);
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": " << test.name << ": "
-            << std::endl << "\tFirstToken(\""
-            << LimitLen(EscapeString(test.inVal), maxStrShowLen) << "\"";
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "FirstToken" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inVal), maxStrShowLen) << "\"";
         if (test.seps)
         {
             std::cerr << ", \"" << EscapeString(test.separator) << "\")";
@@ -621,7 +645,7 @@ TestGroupResult TestFirstToken()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -646,7 +670,7 @@ TestGroupResult TestLastToken()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     std::string sepStr;
     TestGroupResult runResult;
     static const std::string single{"ALongStringWithNoBreak"};
@@ -684,9 +708,10 @@ TestGroupResult TestLastToken()
     {
         std::string resultStr{test.seps ? LastToken(test.inVal, test.separator) : LastToken(test.inVal)};
         result = (test.expected.compare(resultStr) == 0);
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": " << test.name << ": "
-            << std::endl << "\tLastToken(\""
-            << LimitLen(EscapeString(test.inVal), maxStrShowLen) << "\"";
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "LastToken" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inVal), maxStrShowLen) << "\"";
         if (test.seps)
         {
             std::cerr << ", \"" << EscapeString(test.separator) << "\")";
@@ -708,7 +733,7 @@ TestGroupResult TestLastToken()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -738,7 +763,7 @@ TestGroupResult TestSplitFirstToken()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
     static const std::string single{"ALongStringWithNoBreak"};
     static const std::string fox{ "The quick brown fox jumps over the lazy dog" };
@@ -794,8 +819,8 @@ TestGroupResult TestSplitFirstToken()
         std::string token, remainder;
         std::cerr << g_counter
             << TestNumLabel(testNum++, tests.size()) << ": " << test.name << ": " << std::endl
-            << "\tSplitFirstToken(\""
-            << LimitLen(EscapeString(test.inVal), maxStrShowLen)
+            << "\t" << FuncColPrefix << "SplitFirstToken" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inVal), maxStrShowLen)
             << "\", remainder&)" << std::endl
             << "\t  = {\"";
 
@@ -826,7 +851,7 @@ TestGroupResult TestSplitFirstToken()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -856,7 +881,7 @@ TestGroupResult TestSplitLastToken()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     static const std::string single{"ALongStringWithNoBreak"};
@@ -908,11 +933,10 @@ TestGroupResult TestSplitLastToken()
         std::string token, remainder;
         std::cerr << g_counter
             << TestNumLabel(testNum++, tests.size()) << ": " << test.name << ": " << std::endl
-            << "\tSplitLastToken(\""
-            << LimitLen(EscapeString(test.inVal), maxStrShowLen)
+            << "\t" << FuncColPrefix << "SplitLastToken" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inVal), maxStrShowLen)
             << "\", remainder&)" << std::endl
             << "\t  = {\"";
-
         if (test.seps)
         {
             token.assign(SplitLastToken(test.inVal, remainder, test.separator));
@@ -940,7 +964,7 @@ TestGroupResult TestSplitLastToken()
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -951,25 +975,85 @@ TestGroupResult TestPath_BaseName()
 
     struct TestVal
     {
-        std::string name;
+        const std::string name;
+        const std::string inPath;
+        const std::string expected;
+        bool sep;
+        const std::string separator;
+
+        TestVal() = delete;
+        TestVal(const std::string& n, const std::string& i, const std::string& e)
+            : name{ n }, inPath{ i }, expected{ e }, sep{ false }, separator{ "" } {}
+        TestVal(const std::string& n, const std::string& i,
+                const std::string& e, const std::string& s)
+            : name{ n }, inPath{ i }, expected{ e }, sep{ true }, separator{ s } {}
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
+    const std::string winPath{ "C:\\Program Files\\Foo\\Bar\\someFile.txt" };
+    const std::string winPathRes{ "someFile.txt" };
+    const std::string winPathNF{ "C:\\Program Files\\Nope\\NoFile\\" };
+    const std::string winPathNFRes{ "" };
+    const std::string winPathNFD{ "C:\\Program Files\\Nope\\NoFile" };
+    const std::string winPathNFDRes{ "NoFile" }; // as far as the code is concerend this ends in a filename
+
+    tests.push_back({ "Empty", "", "" });
+    tests.push_back({ "Empty with separator", "", "", pathSeparators });
+    tests.push_back({ "Empty with Windows separator", "", "", "\\"});
+    tests.push_back({ "Empty with Mac separator", "", "", ":" });
+    tests.push_back({ "Empty with posix separator", "", "", "/" });
+    tests.push_back({ "Empty with custom separator", "", "", "@" });
+
+    tests.push_back({ "Windows path", winPath, winPathRes });
+    tests.push_back({ "Windows path with separator", winPath, winPathRes, pathSeparators });
+    tests.push_back({ "Windows path with Windows separator", winPath, winPathRes, "\\" });
+    tests.push_back({ "Windows path with Mac separator", winPath, winPath.substr(2), ":"});
+    tests.push_back({ "Windows path with posix separator", winPath, winPath, "/" }); // no match, so it is all the basename
+    tests.push_back({ "Windows path with custom separator", winPath, winPath, "@" });
+
+    tests.push_back({ "Windows path no file", winPathNF, winPathNFRes });
+    tests.push_back({ "Windows path no file with separator", winPathNF, winPathNFRes, pathSeparators });
+    tests.push_back({ "Windows path no file with Windows separator", winPathNF, winPathNFRes, "\\" });
+    tests.push_back({ "Windows path no file with Mac separator", winPathNF, winPathNF.substr(2), ":" });
+    tests.push_back({ "Windows path no file with posix separator", winPathNF, winPathNF, "/" }); // no match, so it is all the basename
+    tests.push_back({ "Windows path no file with custom separator", winPathNF, winPathNF, "@" });
 
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
-    result = true;
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
-            << PassFail(result) << std::endl;
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "BaseName" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inPath), maxStrShowLen) << "\"";
+        std::string baseName;
+        if (test.sep)
+        {
+            std::cerr << ", \"" << EscapeString(test.separator) << "\")";
+            baseName.assign(BaseName(test.inPath, test.separator));
+        }
+        else
+        {
+            std::cerr << ")";
+            baseName.assign(BaseName(test.inPath));
+        }
+        result = (test.expected.compare(baseName) == 0);
+        std::cerr << " = \"" << LimitLen(EscapeString(baseName), maxStrShowLen) << "\"";
+        std::cerr << " -> " << PassFail(result);
+
+        if (!result)
+        {
+            std::cerr << ", expected \""
+                << LimitLen(EscapeString(test.expected), maxStrShowLen) << "\"";
+        }
+        std::cerr << std::endl;
+
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -984,21 +1068,21 @@ TestGroupResult TestPath_DirName()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
-    result = true;
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix 
             << PassFail(result) << std::endl;
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -1012,21 +1096,21 @@ TestGroupResult TestPath_FileShortName()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
-    result = true;
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix
             << PassFail(result) << std::endl;
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -1040,21 +1124,21 @@ TestGroupResult TestPath_AppendDelimiter()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
-    result = true;
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix
             << PassFail(result) << std::endl;
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
@@ -1068,21 +1152,21 @@ TestGroupResult TestPath_StripDelimiter()
     };
 
     std::list<TestVal> tests;
-    bool result;
+    bool result{ true };
     TestGroupResult runResult;
 
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
-    result = true;
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
+        std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
+            << test.name << ": " << std::endl
+            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix
             << PassFail(result) << std::endl;
         runResult &= result;
     }
 
-    std::cout << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
+    std::cout << std::endl << C_BLD << "RUN:" << C_NRM << "\"" << run.Name() << "\": " << runResult << std::endl;
     return runResult;
 }
 
