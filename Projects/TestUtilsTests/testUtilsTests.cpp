@@ -1484,18 +1484,50 @@ TestGroupResult TestPath_FileShortName()
     return runResult;
 }
 
+#include <functional>
 TestGroupResult TestPath_AppendDelimiter()
 {
+    using NaM::CppScratch::Path::AppendDelimiter;
+    using NaM::CppScratch::Path::defaultPathSep;
+    using NaM::CppScratch::Path::defaultWinSep;
+    using NaM::CppScratch::Path::defaultMacSep;
+    using NaM::CppScratch::Path::defaultPosixSep;
     TestRunCerr run("Append a path delimiter to the end of a string");
 
     struct TestVal
     {
-        std::string name;
+        const std::string name;
+        const std::string inVal;
+        const std::string expected;
+        const char delim{ '\0' };
+
+        // std::function<bool(const TestVal&)> run;
     };
 
     std::list<TestVal> tests;
     bool result{ true };
+    static const std::string defaultDelimStr(1, defaultPathSep); // if we need a string version of the char
+    const std::string windowsPath{ "C:\\Program Files\\Foo\\Bar\\Spam" };
+    const std::string windowsPathDelim{ windowsPath + defaultWinSep };
+    const std::string macPath{ "Macintosh HD:Library:Foo:Bar" };
+    const std::string macPathDelim{ macPath + defaultMacSep };
+    const std::string posixPath{ "/usr/local/Foo/Bar/Spam" };
+    const std::string posixPathDelim{ posixPath + defaultPosixSep };
     TestGroupResult runResult;
+
+    tests.push_back({ "Empty", "", "" });
+    tests.push_back({ "Empty with Windows delimiter", "", "", defaultWinSep });
+    tests.push_back({ "Empty with Mac delimiter", "", "", defaultMacSep });
+    tests.push_back({ "Empty with Posix delimiter", "", "", defaultPosixSep });
+
+    tests.push_back({ "Windows path", windowsPath, windowsPathDelim, defaultWinSep });
+    tests.push_back({ "Windows path ending in windows separator", windowsPathDelim, windowsPathDelim, defaultWinSep });
+
+    tests.push_back({ "OSX path", macPath, macPathDelim, defaultMacSep });
+    tests.push_back({ "OSX path ending in osx separator", macPathDelim, macPathDelim, defaultMacSep });
+
+    tests.push_back({ "Posix path", posixPath, posixPathDelim, defaultPosixSep });
+    tests.push_back({ "Posix path ending in posix separator", posixPathDelim, posixPathDelim, defaultPosixSep });
 
     runResult.numTests = tests.size();
     size_t testNum{ 1 }, maxStrShowLen{ 35 };
@@ -1503,8 +1535,25 @@ TestGroupResult TestPath_AppendDelimiter()
     {
         std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
             << test.name << ": " << std::endl
-            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix
-            << PassFail(result) << std::endl;
+            << "\t" << FuncColPrefix << "AppendDelimiter" << FuncColSuffix << "(\""
+            << test.inVal << "\"";
+        if (test.delim)
+        {
+            std::cerr << ", '" << test.delim << "')";
+        }
+        else
+        {
+            std::cerr << ")";
+        }
+        std::string resultStr{ test.delim ? AppendDelimiter(test.inVal, test.delim) : AppendDelimiter(test.inVal) };
+        result = (resultStr.compare(test.expected) == 0);
+        std::cerr << " = \"" << resultStr << "\" -> " << PassFail(result) << std::endl;
+        if (!result)
+        {
+            std::cerr << "\texpected \""
+                << LimitLen(EscapeString(test.expected), maxStrShowLen) << "\"" << std::endl;
+        }
+
         runResult &= result;
     }
 
@@ -1514,16 +1563,45 @@ TestGroupResult TestPath_AppendDelimiter()
 
 TestGroupResult TestPath_StripDelimiter()
 {
+    using NaM::CppScratch::Path::StripDelimiter;
+    using NaM::CppScratch::Path::defaultPathSep;
+    using NaM::CppScratch::Path::defaultWinSep;
+    using NaM::CppScratch::Path::defaultMacSep;
+    using NaM::CppScratch::Path::defaultPosixSep;
     TestRunCerr run("Remove a path delimiter from the end of a string");
 
     struct TestVal
     {
-        std::string name;
+        const std::string name;
+        const std::string inVal;
+        const std::string expected;
+        const char delim{ '\0' };
     };
 
     std::list<TestVal> tests;
     bool result{ true };
+    static const std::string defaultDelimStr(1, defaultPathSep); // if we need a string version of the char
+    const std::string windowsPath{ "C:\\Program Files\\Foo\\Bar\\Spam" };
+    const std::string windowsPathDelim{ windowsPath + defaultWinSep };
+    const std::string macPath{ "Macintosh HD:Library:Foo:Bar" };
+    const std::string macPathDelim{ macPath + defaultMacSep };
+    const std::string posixPath{ "/usr/local/Foo/Bar/Spam" };
+    const std::string posixPathDelim{ posixPath + defaultPosixSep };
     TestGroupResult runResult;
+
+    tests.push_back({ "Empty", "", "" });
+    tests.push_back({ "Empty with Windows delimiter", "", "", defaultWinSep });
+    tests.push_back({ "Empty with Mac delimiter", "", "", defaultMacSep });
+    tests.push_back({ "Empty with Posix delimiter", "", "", defaultPosixSep });
+
+    tests.push_back({ "Windows path", windowsPathDelim, windowsPath, defaultWinSep });
+    tests.push_back({ "Windows path ending in windows separator", windowsPath, windowsPath, defaultWinSep });
+
+    tests.push_back({ "OSX path", macPathDelim, macPath, defaultMacSep });
+    tests.push_back({ "OSX path ending in osx separator", macPath, macPath, defaultMacSep });
+
+    tests.push_back({ "Posix path", posixPathDelim, posixPath, defaultPosixSep });
+    tests.push_back({ "Posix path ending in posix separator", posixPath, posixPath, defaultPosixSep });
 
     runResult.numTests = tests.size();
     size_t testNum{ 1 }, maxStrShowLen{ 35 };
@@ -1531,8 +1609,25 @@ TestGroupResult TestPath_StripDelimiter()
     {
         std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
             << test.name << ": " << std::endl
-            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix
-            << PassFail(result) << std::endl;
+            << "\t" << FuncColPrefix << "StripDelimiter" << FuncColSuffix << "(\""
+            << test.inVal << "\"";
+        if (test.delim)
+        {
+            std::cerr << ", '" << test.delim << "')";
+        }
+        else
+        {
+            std::cerr << ")";
+        }
+        std::string resultStr{ test.delim ? StripDelimiter(test.inVal, test.delim) : StripDelimiter(test.inVal) };
+        result = (resultStr.compare(test.expected) == 0);
+        std::cerr << " = \"" << resultStr << "\" -> " << PassFail(result) << std::endl;
+        if (!result)
+        {
+            std::cerr << "\texpected \""
+                << LimitLen(EscapeString(test.expected), maxStrShowLen) << "\"" << std::endl;
+        }
+
         runResult &= result;
     }
 
