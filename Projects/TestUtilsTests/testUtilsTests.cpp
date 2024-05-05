@@ -837,20 +837,106 @@ TestGroupResult TestSplitLastToken()
 
     struct TestVal
     {
-        std::string name;
+        const std::string name;
+        const std::string inVal;
+        const std::string expectedLast;
+        const std::string expectedRemainder;
+        bool seps;
+        const std::string separator;
+
+        TestVal() = delete;
+        TestVal(const std::string& n, const std::string& i,
+            const std::string& e, const std::string& r)
+            : name{ n }, inVal{ i }, expectedLast{ e }, expectedRemainder{ r },
+            seps{ false }, separator{ "" } {}
+        TestVal(const std::string& n, const std::string& i,
+            const std::string& e, const std::string& r, const std::string& s)
+            : name{ n }, inVal{ i }, expectedLast{ e }, expectedRemainder{ r },
+            seps{ true }, separator{ s } {}
     };
 
     std::list<TestVal> tests;
     bool result;
     TestGroupResult runResult;
 
+    static const std::string single{"ALongStringWithNoBreak"};
+    static const std::string fox{ "The quick brown fox jumps over the lazy dog" };
+    static const std::string foxRem{ "The quick brown fox jumps over the lazy" };
+    static const std::string para{
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor\n"
+        "incididunt ut labore et dolore magna aliqua.Vel pharetra vel turpis nunc eget\n"
+        "lorem.Maecenas ultricies mi eget mauris pharetra et ultrices.Id velit ut\n"
+        "tortor pretium viverra suspendisse potenti nullam.Consectetur adipiscing elit\n"
+        "ut aliquam purus sit amet.Morbi leo urna molestie at elementum eu facilisis\n"
+        "sed."};
+    static const std::string paraL1_5{
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor\n"
+        "incididunt ut labore et dolore magna aliqua.Vel pharetra vel turpis nunc eget\n"
+        "lorem.Maecenas ultricies mi eget mauris pharetra et ultrices.Id velit ut\n"
+        "tortor pretium viverra suspendisse potenti nullam.Consectetur adipiscing elit\n"
+        "ut aliquam purus sit amet.Morbi leo urna molestie at elementum eu facilisis"};
+    static const std::string paraL6{ "sed." };
+    static const std::string paraWSRem{
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor\n"
+        "incididunt ut labore et dolore magna aliqua.Vel pharetra vel turpis nunc eget\n"
+        "lorem.Maecenas ultricies mi eget mauris pharetra et ultrices.Id velit ut\n"
+        "tortor pretium viverra suspendisse potenti nullam.Consectetur adipiscing elit\n"
+        "ut aliquam purus sit amet.Morbi leo urna molestie at elementum eu"};
+
+    // remember it defaults to ws separator
+    tests.push_back({ "Empty string", "", "", ""});
+    tests.push_back({ "Empty string with ws separator", "", "", "", wsSeparators});
+    tests.push_back({ "Empty string with path separator", "", "", "", pathSeparators});
+    tests.push_back({ "Empty string with line end separator", "", "", "", lineEndSeparators});
+
+    tests.push_back({ "Single token", single, single, "" });
+    tests.push_back({ "Single token with ws separator", single, single, "", wsSeparators});
+    tests.push_back({ "Single token with found custom separator", single, "tringWithNoBreak", "ALong", "S" });
+    tests.push_back({ "Single token with no found custom separator", single, single, "", "~" });
+
+    tests.push_back({ "Sentence", fox, "dog", foxRem });
+    tests.push_back({ "Sentence with ws separator", fox, "dog", foxRem, wsSeparators });
+
+    tests.push_back({ "Paragraph", para, "facilisis\nsed.", paraWSRem });
+    tests.push_back({ "Paragraph with path separator", para, para, "", pathSeparators});
+    tests.push_back({ "Paragraph with line end separator", para, paraL6, paraL1_5, lineEndSeparators });
+
     runResult.numTests = tests.size();
-    size_t testNum{ 1 };
+    size_t testNum{ 1 }, maxStrShowLen{ 35 };
     for (TestVal& test : tests)
     {
-        std::cerr << g_counter << TestNumLabel(testNum++, tests.size())
-            << "TODO"
-            << PassFail(result) << std::endl;
+        std::string token, remainder;
+        std::cerr << g_counter
+            << TestNumLabel(testNum++, tests.size()) << ": " << test.name << ": " << std::endl
+            << "\tSplitLastToken(\""
+            << LimitLen(EscapeString(test.inVal), maxStrShowLen)
+            << "\", remainder&)" << std::endl
+            << "\t  = {\"";
+
+        if (test.seps)
+        {
+            token.assign(SplitLastToken(test.inVal, remainder, test.separator));
+        }
+        else
+        {
+            token.assign(SplitLastToken(test.inVal, remainder));
+        }
+        result = ((test.expectedLast.compare(token) == 0) &&
+            (test.expectedRemainder.compare(remainder) == 0));
+
+        std::cerr << LimitLen(EscapeString(token), maxStrShowLen)
+            << "\", \"" << LimitLen(EscapeString(remainder), maxStrShowLen)
+            << "\"} -> " << PassFail(result);
+        if (!result)
+        {
+            std::cerr << ", " << std::endl << "\texpected {\""
+                << LimitLen(EscapeString(test.expectedLast), maxStrShowLen)
+                << "\", \""
+                << LimitLen(EscapeString(test.expectedRemainder), maxStrShowLen)
+                << "\"}";
+        }
+        std::cerr << std::endl;
+
         runResult &= result;
     }
 
