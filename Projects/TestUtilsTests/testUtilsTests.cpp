@@ -1218,14 +1218,124 @@ TestGroupResult TestPath_DirName()
     using NaM::CppScratch::Path::DirName;
     TestRunCerr run("Get the dirname from a path (directory/folder name)");
 
+
     struct TestVal
     {
-        std::string name;
+        const std::string name;
+        const std::string inPath;
+        const std::string expected;
+        bool sep;
+        const std::string separator;
+
+        TestVal() = delete;
+        TestVal(const std::string& n, const std::string& i, const std::string& e)
+            : name{ n }, inPath{ i }, expected{ e }, sep{ false }, separator{ "" } {}
+        TestVal(const std::string& n, const std::string& i,
+            const std::string& e, const std::string& s)
+            : name{ n }, inPath{ i }, expected{ e }, sep{ true }, separator{ s } {}
     };
 
     std::list<TestVal> tests;
     bool result{ true };
     TestGroupResult runResult;
+
+    // Empty
+    tests.push_back({ "Empty", "", "" });
+    tests.push_back({ "Empty with separator", "", "", pathSeparators });
+    tests.push_back({ "Empty with Windows separator", "", "", "\\" });
+    tests.push_back({ "Empty with Mac separator", "", "", ":" });
+    tests.push_back({ "Empty with posix separator", "", "", "/" });
+    tests.push_back({ "Empty with custom separator", "", "", "@" });
+
+    // Windows
+    const std::string winPath{ "C:\\Program Files\\Foo\\Bar\\someFile.txt" };
+    const std::string winPathRes{ "C:\\Program Files\\Foo\\Bar" };
+    const std::string winPathNF{ "C:\\Program Files\\Nope\\NoFile\\" };
+    const std::string winPathNFRes{ "C:\\Program Files\\Nope\\NoFile" };
+    const std::string winPathNFD{ "C:\\Program Files\\Nope\\NoFile" };
+    const std::string winPathNFDRes{ "C:\\Program Files\\Nope" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "Windows path", winPath, winPathRes });
+        tests.push_back({ "Windows path with all separators", winPath, winPathRes, pathSeparators });
+        tests.push_back({ "Windows path with Windows separator", winPath, winPathRes, "\\" });
+        tests.push_back({ "Windows path with Mac separator", winPath, winPath.substr(0, 1), ":" });
+        tests.push_back({ "Windows path with posix separator", winPath, winPath, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path with custom separator", winPath, winPath, "@" });
+
+        tests.push_back({ "Windows path no file", winPathNF, winPathNFRes });
+        tests.push_back({ "Windows path no file with all separators", winPathNF, winPathNFRes, pathSeparators });
+        tests.push_back({ "Windows path no file with Windows separator", winPathNF, winPathNFRes, "\\" });
+        tests.push_back({ "Windows path no file with Mac separator", winPathNF, winPathNF.substr(0,1), ":" });
+        tests.push_back({ "Windows path no file with posix separator", winPathNF, winPathNF, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path no file with custom separator", winPathNF, winPathNF, "@" });
+
+        tests.push_back({ "Windows path no file ext", winPathNFD, winPathNFDRes });
+        tests.push_back({ "Windows path no file ext with all separatorss", winPathNFD, winPathNFDRes, pathSeparators });
+        tests.push_back({ "Windows path no file ext with Windows separator", winPathNFD, winPathNFDRes, "\\" });
+        tests.push_back({ "Windows path no file ext with Mac separator", winPathNFD, winPathNFD.substr(0,1), ":" });
+        tests.push_back({ "Windows path no file ext with posix separator", winPathNFD, winPathNFD, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path no file ext with custom separator", winPathNFD, winPathNFD, "@" });
+    }
+
+    // OSX
+    const std::string macPath{ "Macintosh HD:Library:Foo:Bar:someFile.txt" };
+    const std::string macPathRes{ "Macintosh HD:Library:Foo:Bar" };
+    const std::string macPathNF{ "Macintosh HD:Library:Nope:NoFile:" };
+    const std::string macPathNFRes{ "Macintosh HD:Library:Nope:NoFile" };
+    const std::string macPathNFD{ "Macintosh HD:Library:Nope:NoFile" };
+    const std::string macPathNFDRes{ "Macintosh HD:Library:Nope" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "OSX path", macPath, macPathRes });
+        tests.push_back({ "OSX path with all separators", macPath, macPathRes, pathSeparators });
+        tests.push_back({ "OSX path with Windows separator", macPath, macPath, "\\" });
+        tests.push_back({ "OSX path with Mac separator", macPath, macPathRes, ":" });
+        tests.push_back({ "OSX path with posix separator", macPath, macPath, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path with custom separator", macPath, macPath, "@" });
+
+        tests.push_back({ "OSX path no file", macPathNF, macPathNFRes });
+        tests.push_back({ "OSX path no file with all separators", macPathNF, macPathNFRes, pathSeparators });
+        tests.push_back({ "OSX path no file with Windows separator", macPathNF, macPathNF, "\\" });
+        tests.push_back({ "OSX path no file with Mac separator", macPathNF, macPathNFRes, ":" });
+        tests.push_back({ "OSX path no file with posix separator", macPathNF, macPathNF, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path no file with custom separator", macPathNF, macPathNF, "@" });
+
+        tests.push_back({ "OSX path no file ext", macPathNFD, macPathNFDRes });
+        tests.push_back({ "OSX path no file ext with all separators", macPathNFD, macPathNFDRes, pathSeparators });
+        tests.push_back({ "OSX path no file ext with Windows separator", macPathNFD, macPathNFD, "\\" });
+        tests.push_back({ "OSX path no file ext with Mac separator", macPathNFD, macPathNFDRes, ":" });
+        tests.push_back({ "OSX path no file ext with posix separator", macPathNFD, macPathNFD, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path no file ext with custom separator", macPathNFD, macPathNFD, "@" });
+    }
+
+    // posix
+    const std::string posixPath{ "/usr/local/Foo/Bar/someFile.txt" };
+    const std::string posixPathRes{ "/usr/local/Foo/Bar" };
+    const std::string posixPathNF{ "/usr/local/Nope/NoFile/" };
+    const std::string posixPathNFRes{ "/usr/local/Nope/NoFile" };
+    const std::string posixPathNFD{ "/usr/local/Nope/NoFile" };
+    const std::string posixPathNFDRes{ "/usr/local/Nope" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "Posix path", posixPath, posixPathRes });
+        tests.push_back({ "Posix path with all separators", posixPath, posixPathRes, pathSeparators });
+        tests.push_back({ "Posix path with Windows separator", posixPath, posixPath, "\\" });
+        tests.push_back({ "Posix path with Mac separator", posixPath, posixPath, ":" });
+        tests.push_back({ "Posix path with posix separator", posixPath, posixPathRes, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Posix path with custom separator", posixPath, posixPath, "@" });
+
+        tests.push_back({ "Posix path no file", posixPathNF, posixPathNFRes });
+        tests.push_back({ "Posix path no file with all separators", posixPathNF, posixPathNFRes, pathSeparators });
+        tests.push_back({ "Posix path no file with Windows separator", posixPathNF, posixPathNF, "\\" });
+        tests.push_back({ "Posix path no file with Mac separator", posixPathNF, posixPathNF, ":" });
+        tests.push_back({ "Posix path no file with posix separator", posixPathNF, posixPathNFRes, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Posix path no file with custom separator", posixPathNF, posixPathNF, "@" });
+
+        tests.push_back({ "Posix path no file ext", posixPathNFD, posixPathNFDRes });
+        tests.push_back({ "Posix path no file ext with all separators", posixPathNFD, posixPathNFDRes, pathSeparators });
+        tests.push_back({ "Posix path no file ext with Windows separator", posixPathNFD, posixPathNFD, "\\" });
+        tests.push_back({ "Posix path no file ext with Mac separator", posixPathNFD, posixPathNFD, ":" });
+        tests.push_back({ "Posix path no file ext with posix separator", posixPathNFD, posixPathNFDRes, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Posix path no file ext with custom separator", posixPathNFD, posixPathNFD, "@" });
+    }
 
     runResult.numTests = tests.size();
     size_t testNum{ 1 }, maxStrShowLen{ 35 };
@@ -1233,8 +1343,30 @@ TestGroupResult TestPath_DirName()
     {
         std::cerr << g_counter << TestNumLabel(testNum++, tests.size()) << ": "
             << test.name << ": " << std::endl
-            << "\t" << FuncColPrefix << "TODO" << FuncColSuffix 
-            << PassFail(result) << std::endl;
+            << "\t" << FuncColPrefix << "DirName" << FuncColSuffix
+            << "(\"" << LimitLen(EscapeString(test.inPath), maxStrShowLen) << "\"";
+        std::string baseName;
+        if (test.sep)
+        {
+            std::cerr << ", \"" << EscapeString(test.separator) << "\")";
+            baseName.assign(DirName(test.inPath, test.separator));
+        }
+        else
+        {
+            std::cerr << ")";
+            baseName.assign(DirName(test.inPath));
+        }
+        result = (test.expected.compare(baseName) == 0);
+        std::cerr << " = \"" << LimitLen(EscapeString(baseName), maxStrShowLen) << "\"";
+        std::cerr << " -> " << PassFail(result);
+
+        if (!result)
+        {
+            std::cerr << ", expected \""
+                << LimitLen(EscapeString(test.expected), maxStrShowLen) << "\"";
+        }
+        std::cerr << std::endl;
+
         runResult &= result;
     }
 
