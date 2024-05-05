@@ -77,6 +77,7 @@ namespace NaM
             }
             else if (lastpos == std::string::npos)
             {
+                remainder.clear();
                 return in;
             }
             else
@@ -96,6 +97,7 @@ namespace NaM
             }
             else if (firstpos == std::string::npos)
             {
+                remainder.clear();
                 return in;
             }
             else
@@ -112,8 +114,7 @@ namespace NaM
         template<typename T> // how do I limit this to a integer type?
         const size_t TextNumLength(const T& num)
         {
-            return (
-                    num == 0 ?
+            return (num == 0 ?
                     1 : 
                     static_cast<size_t>(std::floor(std::log10(std::abs(static_cast<double>(num)))) + (num < 0 ? 2 : 1)));
         }
