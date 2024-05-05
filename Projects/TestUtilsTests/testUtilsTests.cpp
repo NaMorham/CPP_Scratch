@@ -21,13 +21,25 @@ using NaM::CppScratch::TextNumLength;
 using NaM::CppScratch::XofYStr;
 using NaM::CppScratch::Path::FileShortName;
 
+//extern std::string C_BYORG;
+//extern std::string C_BORG;
+//extern std::string C_NRM;
+
 struct TestGroupResult
 {
     size_t numPassed{ 0 }, numTests{ 0 };
     [[nodiscard]] inline bool Passed() const { return (numPassed == numTests); }
     inline TestGroupResult& operator&=(const bool result)
     {
-        if (result) { ++numPassed; }
+        if (result)
+        {
+            ++numPassed;
+//            std::cerr << C_BYORG << "Add to numPassed (" << numPassed << ")" << C_NRM << std::endl;
+//        }
+//        else
+//        {
+//            std::cerr << C_BORG << "No change to numPassed (" << numPassed << ")" << C_NRM << std::endl;
+        }
         return *this;
     }
     inline TestGroupResult& operator+=(const TestGroupResult& other)
@@ -101,48 +113,74 @@ constexpr const char* const def_CB_BBLU{"\033[104m"};
 constexpr const char* const def_CB_BMAG{"\033[105m"};
 constexpr const char* const def_CB_BCYN{"\033[106m"};
 constexpr const char* const def_CB_BWHT{"\033[107m"};
+
+// custom colours
+constexpr const char* const def_C_ORG{ "\033[38;2;200;100;0m" };
+constexpr const char* const def_C_BORG{ "\033[38;2;255;100;0m" };
+constexpr const char* const def_CB_ORG{ "\033[48;2;200;100;0m" };
+constexpr const char* const def_CB_BORG{ "\033[48;2;255;100;0m" };
+
+constexpr const char* const def_C_YORG{ "\033[38;2;200;177;0m" };
+constexpr const char* const def_C_BYORG{ "\033[38;2;255;177;0m" };
+constexpr const char* const def_CB_YORG{ "\033[48;2;200;177;0m" };
+constexpr const char* const def_CB_BYORG{ "\033[48;2;255;177;0m" };
+//echo - e "\033[38;2;200;100;0mTRUECOLOR\033[0m"
+//echo - e "\033[38;2;255;100;0mTRUECOLOR\033[0m"
+//echo - e "\033[38;2;255;177;0mTRUECOLOR\033[0m"
+//echo - e "\033[38;2;255;177;222mTRUECOLOR\033[0m"
 #else
-constexpr const char* const def_C_NRM{""};
+constexpr const char* const def_C_NRM{ "" };
 
-constexpr const char* const def_C_BLD{""};
-constexpr const char* const def_C_ITL{""};
-constexpr const char* const def_C_UND{""};
+constexpr const char* const def_C_BLD{ "" };
+constexpr const char* const def_C_ITL{ "" };
+constexpr const char* const def_C_UND{ "" };
 
-constexpr const char* const def_C_BLK{""};
-constexpr const char* const def_C_RED{""};
-constexpr const char* const def_C_GRN{""};
-constexpr const char* const def_C_YEL{""};
-constexpr const char* const def_C_BLU{""};
-constexpr const char* const def_C_MAG{""};
-constexpr const char* const def_C_CYN{""};
-constexpr const char* const def_C_WHT{""};
+constexpr const char* const def_C_BLK{ "" };
+constexpr const char* const def_C_RED{ "" };
+constexpr const char* const def_C_GRN{ "" };
+constexpr const char* const def_C_YEL{ "" };
+constexpr const char* const def_C_BLU{ "" };
+constexpr const char* const def_C_MAG{ "" };
+constexpr const char* const def_C_CYN{ "" };
+constexpr const char* const def_C_WHT{ "" };
 
-constexpr const char* const def_C_BBLK{""};
-constexpr const char* const def_C_BRED{""};
-constexpr const char* const def_C_BGRN{""};
-constexpr const char* const def_C_BYEL{""};
-constexpr const char* const def_C_BBLU{""};
-constexpr const char* const def_C_BMAG{""};
-constexpr const char* const def_C_BCYN{""};
-constexpr const char* const def_C_BWHT{""};
+constexpr const char* const def_C_BBLK{ "" };
+constexpr const char* const def_C_BRED{ "" };
+constexpr const char* const def_C_BGRN{ "" };
+constexpr const char* const def_C_BYEL{ "" };
+constexpr const char* const def_C_BBLU{ "" };
+constexpr const char* const def_C_BMAG{ "" };
+constexpr const char* const def_C_BCYN{ "" };
+constexpr const char* const def_C_BWHT{ "" };
 
-constexpr const char* const def_CB_BLK{""};
-constexpr const char* const def_CB_RED{""};
-constexpr const char* const def_CB_GRN{""};
-constexpr const char* const def_CB_YEL{""};
-constexpr const char* const def_CB_BLU{""};
-constexpr const char* const def_CB_MAG{""};
-constexpr const char* const def_CB_CYN{""};
-constexpr const char* const def_CB_WHT{""};
+constexpr const char* const def_CB_BLK{ "" };
+constexpr const char* const def_CB_RED{ "" };
+constexpr const char* const def_CB_GRN{ "" };
+constexpr const char* const def_CB_YEL{ "" };
+constexpr const char* const def_CB_BLU{ "" };
+constexpr const char* const def_CB_MAG{ "" };
+constexpr const char* const def_CB_CYN{ "" };
+constexpr const char* const def_CB_WHT{ "" };
 
-constexpr const char* const def_CB_BBLK{""};
-constexpr const char* const def_CB_BRED{""};
-constexpr const char* const def_CB_BGRN{""};
-constexpr const char* const def_CB_BYEL{""};
-constexpr const char* const def_CB_BBLU{""};
-constexpr const char* const def_CB_BMAG{""};
-constexpr const char* const def_CB_BCYN{""};
-constexpr const char* const def_CB_BWHT{""};
+constexpr const char* const def_CB_BBLK{ "" };
+constexpr const char* const def_CB_BRED{ "" };
+constexpr const char* const def_CB_BGRN{ "" };
+constexpr const char* const def_CB_BYEL{ "" };
+constexpr const char* const def_CB_BBLU{ "" };
+constexpr const char* const def_CB_BMAG{ "" };
+constexpr const char* const def_CB_BCYN{ "" };
+constexpr const char* const def_CB_BWHT{ "" };
+
+// custom colours
+constexpr const char* const def_C_ORG{ "" };
+constexpr const char* const def_C_BORG{ "" };
+constexpr const char* const def_CB_ORG{ "" };
+constexpr const char* const def_CB_BORG{ "" };
+
+constexpr const char* const def_C_YORG{ "" };
+constexpr const char* const def_C_BYORG{ "" };
+constexpr const char* const def_CB_YORG{ "" };
+constexpr const char* const def_CB_BYORG{ "" };
 #endif
 
 #if 1
@@ -187,6 +225,17 @@ constexpr const char* const udef_CB_BBLU{ "" };
 constexpr const char* const udef_CB_BMAG{ "" };
 constexpr const char* const udef_CB_BCYN{ "" };
 constexpr const char* const udef_CB_BWHT{ "" };
+
+// custom colours
+constexpr const char* const udef_C_ORG{ "" };
+constexpr const char* const udef_C_BORG{ "" };
+constexpr const char* const udef_CB_ORG{ "" };
+constexpr const char* const udef_CB_BORG{ "" };
+
+constexpr const char* const udef_C_YORG{ "" };
+constexpr const char* const udef_C_BYORG{ "" };
+constexpr const char* const udef_CB_YORG{ "" };
+constexpr const char* const udef_CB_BYORG{ "" };
 #endif
 
 #if 1
@@ -231,6 +280,17 @@ static std::string CB_BBLU{ def_CB_BBLU };
 static std::string CB_BMAG{ def_CB_BMAG };
 static std::string CB_BCYN{ def_CB_BCYN };
 static std::string CB_BWHT{ def_CB_BWHT };
+
+// custom colours
+static std::string C_ORG{ def_C_ORG };
+static std::string C_BORG{ def_C_BORG };
+static std::string CB_ORG{ def_CB_ORG };
+static std::string CB_BORG{ def_CB_BORG };
+
+static std::string C_YORG{ def_C_YORG };
+static std::string C_BYORG{ def_C_BYORG };
+static std::string CB_YORG{ def_CB_YORG };
+static std::string CB_BYORG{ def_CB_BYORG };
 #endif
 
 const std::string PassFail(const bool result);
@@ -261,6 +321,18 @@ int main(int argc, char *argv[])
     allResult += TestPath_StripDelimiter();
 
     std::cout << std::endl << "After all tests. " << allResult << std::endl << std::endl;
+    /*
+    std::cout
+        << C_ORG << "TEST" << C_NRM << std::endl
+        << C_BORG << "TEST" << C_NRM << std::endl
+        << CB_ORG << "TEST" << C_NRM << std::endl
+        << CB_BORG << "TEST" << C_NRM << std::endl;
+    std::cout
+        << C_YORG << "TEST" << C_NRM << std::endl
+        << C_BYORG << "TEST" << C_NRM << std::endl
+        << C_BLK << CB_YORG << "TEST" << C_NRM << std::endl
+        << C_BLK << CB_BYORG << "TEST" << C_NRM << std::endl;
+    //*/
     return allResult.Passed() ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
@@ -273,11 +345,11 @@ const std::string PassFail(const bool result)
     std::stringstream ss;
     if (result)
     {
-        ss << C_BLD << C_GRN << _passStr << C_NRM;
+        ss << C_BGRN << _passStr << C_NRM;
     }
     else
     {
-        ss << C_BLD << C_RED << _failStr << C_NRM;
+        ss << C_BRED << _failStr << C_NRM;
     }
     return ss.str();
 }
@@ -338,7 +410,16 @@ std::ostream& operator<<(std::ostream& oss, const TestGroupResult& res)
     else
         colPrefix << C_BLD << C_RED;
     std::string& colNorm{ C_NRM };
-    float pct{ res.numTests ? (res.numPassed / res.numTests * 100.0f) : 0.0f };
+    float pct{ 0.0f };
+    if (res.numTests > 0)
+    {
+        pct = (static_cast<float>(res.numPassed) / res.numTests) * 100.0f;
+        //std::cerr << C_BORG << "Calc pct = " << pct << C_NRM << std::endl;
+    }
+    else
+    {
+        //std::cerr << C_ORG << "No tests, do not calc pct" << C_NRM << std::endl;
+    }
     oss << colPrefix.str() << res.numPassed << colNorm << " of "
         << colPrefix.str() << res.numTests << colNorm << " tests passed ("
         << colPrefix.str() << std::fixed << std::setprecision(2) << pct << "%"
@@ -346,6 +427,7 @@ std::ostream& operator<<(std::ostream& oss, const TestGroupResult& res)
     return oss;
 }
 
+/*
 struct FuncColPrefix_t
 {
     std::string prefix;
@@ -361,6 +443,9 @@ struct FuncColPrefix_t
 };
 static FuncColPrefix_t _FuncColPrefix;
 static const std::string FuncColPrefix{ _FuncColPrefix.prefix };
+/*/
+static const std::string FuncColPrefix{ C_BBLU };
+//*/
 static const std::string FuncColSuffix{ C_NRM };
 
 TestGroupResult TestTrueOrFalse()
@@ -992,13 +1077,8 @@ TestGroupResult TestPath_BaseName()
     std::list<TestVal> tests;
     bool result{ true };
     TestGroupResult runResult;
-    const std::string winPath{ "C:\\Program Files\\Foo\\Bar\\someFile.txt" };
-    const std::string winPathRes{ "someFile.txt" };
-    const std::string winPathNF{ "C:\\Program Files\\Nope\\NoFile\\" };
-    const std::string winPathNFRes{ "" };
-    const std::string winPathNFD{ "C:\\Program Files\\Nope\\NoFile" };
-    const std::string winPathNFDRes{ "NoFile" }; // as far as the code is concerend this ends in a filename
 
+    // Empty
     tests.push_back({ "Empty", "", "" });
     tests.push_back({ "Empty with separator", "", "", pathSeparators });
     tests.push_back({ "Empty with Windows separator", "", "", "\\"});
@@ -1006,19 +1086,95 @@ TestGroupResult TestPath_BaseName()
     tests.push_back({ "Empty with posix separator", "", "", "/" });
     tests.push_back({ "Empty with custom separator", "", "", "@" });
 
-    tests.push_back({ "Windows path", winPath, winPathRes });
-    tests.push_back({ "Windows path with separator", winPath, winPathRes, pathSeparators });
-    tests.push_back({ "Windows path with Windows separator", winPath, winPathRes, "\\" });
-    tests.push_back({ "Windows path with Mac separator", winPath, winPath.substr(2), ":"});
-    tests.push_back({ "Windows path with posix separator", winPath, winPath, "/" }); // no match, so it is all the basename
-    tests.push_back({ "Windows path with custom separator", winPath, winPath, "@" });
+    // Windows
+    const std::string winPath{ "C:\\Program Files\\Foo\\Bar\\someFile.txt" };
+    const std::string winPathRes{ "someFile.txt" };
+    const std::string winPathNF{ "C:\\Program Files\\Nope\\NoFile\\" };
+    const std::string winPathNFRes{ "" };
+    const std::string winPathNFD{ "C:\\Program Files\\Nope\\NoFile" };
+    const std::string winPathNFDRes{ "NoFile" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "Windows path", winPath, winPathRes });
+        tests.push_back({ "Windows path with all separators", winPath, winPathRes, pathSeparators });
+        tests.push_back({ "Windows path with Windows separator", winPath, winPathRes, "\\" });
+        tests.push_back({ "Windows path with Mac separator", winPath, winPath.substr(2), ":" });
+        tests.push_back({ "Windows path with posix separator", winPath, winPath, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path with custom separator", winPath, winPath, "@" });
 
-    tests.push_back({ "Windows path no file", winPathNF, winPathNFRes });
-    tests.push_back({ "Windows path no file with separator", winPathNF, winPathNFRes, pathSeparators });
-    tests.push_back({ "Windows path no file with Windows separator", winPathNF, winPathNFRes, "\\" });
-    tests.push_back({ "Windows path no file with Mac separator", winPathNF, winPathNF.substr(2), ":" });
-    tests.push_back({ "Windows path no file with posix separator", winPathNF, winPathNF, "/" }); // no match, so it is all the basename
-    tests.push_back({ "Windows path no file with custom separator", winPathNF, winPathNF, "@" });
+        tests.push_back({ "Windows path no file", winPathNF, winPathNFRes });
+        tests.push_back({ "Windows path no file with all separators", winPathNF, "", pathSeparators });
+        tests.push_back({ "Windows path no file with Windows separator", winPathNF, "", "\\"});
+        tests.push_back({ "Windows path no file with Mac separator", winPathNF, winPathNF.substr(2), ":" });
+        tests.push_back({ "Windows path no file with posix separator", winPathNF, winPathNF, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path no file with custom separator", winPathNF, winPathNF, "@" });
+
+        tests.push_back({ "Windows path no file ext", winPathNFD, winPathNFDRes });
+        tests.push_back({ "Windows path no file ext with all separatorss", winPathNFD, winPathNFDRes, pathSeparators });
+        tests.push_back({ "Windows path no file ext with Windows separator", winPathNFD, winPathNFDRes, "\\" });
+        tests.push_back({ "Windows path no file ext with Mac separator", winPathNFD, winPathNFD.substr(2), ":" });
+        tests.push_back({ "Windows path no file ext with posix separator", winPathNFD, winPathNFD, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Windows path no file ext with custom separator", winPathNFD, winPathNFD, "@" });
+    }
+
+    // OSX
+    const std::string macPath{ "Macintosh HD:Library:Foo:Bar:someFile.txt" };
+    const std::string macPathRes{ "someFile.txt" };
+    const std::string macPathNF{ "Macintosh HD:Library:Nope:NoFile:" };
+    const std::string macPathNFRes{ "" };
+    const std::string macPathNFD{ "Macintosh HD:Library:Nope:NoFile" };
+    const std::string macPathNFDRes{ "NoFile" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "OSX path", macPath, macPathRes });
+        tests.push_back({ "OSX path with all separators", macPath, macPathRes, pathSeparators });
+        tests.push_back({ "OSX path with Windows separator", macPath, macPath, "\\" });
+        tests.push_back({ "OSX path with Mac separator", macPath, macPathRes, ":" });
+        tests.push_back({ "OSX path with posix separator", macPath, macPath, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path with custom separator", macPath, macPath, "@" });
+
+        tests.push_back({ "OSX path no file", macPathNF, macPathNFRes });
+        tests.push_back({ "OSX path no file with all separators", macPathNF, macPathNFRes, pathSeparators });
+        tests.push_back({ "OSX path no file with Windows separator", macPathNF, macPathNF, "\\" });
+        tests.push_back({ "OSX path no file with Mac separator", macPathNF, "", ":"});
+        tests.push_back({ "OSX path no file with posix separator", macPathNF, macPathNF, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path no file with custom separator", macPathNF, macPathNF, "@" });
+
+        tests.push_back({ "OSX path no file ext", macPathNFD, macPathNFDRes });
+        tests.push_back({ "OSX path no file ext with all separators", macPathNFD, macPathNFDRes, pathSeparators });
+        tests.push_back({ "OSX path no file ext with Windows separator", macPathNFD, macPathNFD, "\\" });
+        tests.push_back({ "OSX path no file ext with Mac separator", macPathNFD, macPathNFDRes, ":" });
+        tests.push_back({ "OSX path no file ext with posix separator", macPathNFD, macPathNFD, "/" }); // no match, so it is all the basename
+        tests.push_back({ "OSX path no file ext with custom separator", macPathNFD, macPathNFD, "@" });
+    }
+
+    // posix
+    const std::string posixPath{ "/usr/local/Foo/Bar/someFile.txt" };
+    const std::string posixPathRes{ "someFile.txt" };
+    const std::string posixPathNF{ "/usr/local/Nope/NoFile/" };
+    const std::string posixPathNFRes{ "" };
+    const std::string posixPathNFD{ "/usr/local/Nope/NoFile" };
+    const std::string posixPathNFDRes{ "NoFile" }; // as far as the code is concerend this ends in a filename
+    {
+        tests.push_back({ "Posix path", posixPath, posixPathRes });
+        tests.push_back({ "Posix path with all separators", posixPath, posixPathRes, pathSeparators });
+        tests.push_back({ "Posix path with Windows separator", posixPath, posixPath, "\\" });
+        tests.push_back({ "Posix path with Mac separator", posixPath, posixPath, ":" });
+        tests.push_back({ "Posix path with posix separator", posixPath, posixPathRes, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Posix path with custom separator", posixPath, posixPath, "@" });
+
+        tests.push_back({ "Posix path no file", posixPathNF, posixPathNFRes });
+        tests.push_back({ "Posix path no file with all separators", posixPathNF, posixPathNFRes, pathSeparators });
+        tests.push_back({ "Posix path no file with Windows separator", posixPathNF, posixPathNF, "\\" });
+        tests.push_back({ "Posix path no file with Mac separator", posixPathNF, posixPathNF, ":" });
+        tests.push_back({ "Posix path no file with posix separator", posixPathNF, "", "/"}); // no match, so it is all the basename
+        tests.push_back({ "Posix path no file with custom separator", posixPathNF, posixPathNF, "@" });
+
+        tests.push_back({ "Posix path no file ext", posixPathNFD, posixPathNFDRes });
+        tests.push_back({ "Posix path no file ext with all separators", posixPathNFD, posixPathNFDRes, pathSeparators });
+        tests.push_back({ "Posix path no file ext with Windows separator", posixPathNFD, posixPathNFD, "\\" });
+        tests.push_back({ "Posix path no file ext with Mac separator", posixPathNFD, posixPathNFD, ":" });
+        tests.push_back({ "Posix path no file ext with posix separator", posixPathNFD, posixPathNFDRes, "/" }); // no match, so it is all the basename
+        tests.push_back({ "Posix path no file ext with custom separator", posixPathNFD, posixPathNFD, "@" });
+    }
 
     runResult.numTests = tests.size();
     size_t testNum{ 1 }, maxStrShowLen{ 35 };
@@ -1250,4 +1406,10 @@ void UseColour(const bool use)
     CB_BMAG.assign(use ? def_CB_BMAG : udef_CB_BMAG);
     CB_BCYN.assign(use ? def_CB_BCYN : udef_CB_BCYN);
     CB_BWHT.assign(use ? def_CB_BWHT : udef_CB_BWHT);
+
+    // extra colours
+    C_ORG.assign(use ? def_C_ORG : udef_C_ORG);
+    C_BORG.assign(use ? def_C_BORG : udef_C_BORG);
+    CB_ORG.assign(use ? def_CB_ORG : udef_CB_ORG);
+    CB_BORG.assign(use ? def_CB_BORG : udef_CB_BORG);
 }
