@@ -4,6 +4,7 @@
 #include <set>
 
 #include "uniqueTestVer.h"
+#include "NaM/identifiable.h"
 
 //-----------------------------------------------------------------------------
 typedef std::uint64_t TypeID;
@@ -82,6 +83,7 @@ IdManager Test2::sm_idm = IdManager();
 const TypeID Test2::sm_typeId = GetId<Test2>();
 
 //-----------------------------------------------------------------------------
+/*
 template<typename T>
 class Identifiable
 {
@@ -109,9 +111,10 @@ const TypeID Identifiable<T>::sm_typeId = GetId<T>();
 
 template<typename T>
 std::string Identifiable<T>::sm_typename{""};
+*/
 
 //-----------------------------------------------------------------------------
-class Test3 : public Identifiable<Test3>
+class Test3 : public NaM::CppScratch::Identifiable<Test3>
 {
 private:
     std::uint32_t m_value;
@@ -182,7 +185,7 @@ public:
     }
 };
 
-class Test4 : public Identifiable<Test4>, public StatBase
+class Test4 : public NaM::CppScratch::Identifiable<Test4>, public StatBase
 {
 private:
 
@@ -241,7 +244,8 @@ std::ostream& operator<<(std::ostream& oss, const Test2& test) {
 
 std::ostream& operator<<(std::ostream& oss, const Test3& test) {
     oss << "Type (" << test.GetTypeName() << ":" << test.GetTypeID() << "), Id: "
-        << test.GetID() << ", Our value: " << test.Value();
+        << test.GetID() << ", Count: " << test.GetTypeCount()
+        << ", Our value: " << test.Value();
     return oss;
 }
 
